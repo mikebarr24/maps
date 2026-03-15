@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@import "./styles/theme.css";
+
+@theme inline {
+  --color-background: var(--theme-color-background);
+  --color-foreground: var(--theme-color-foreground);
+  --color-surface: var(--theme-color-surface);
+  --color-surface-elevated: var(--theme-color-surface-elevated);
+  --color-border: var(--theme-color-border);
+  --color-muted: var(--theme-color-muted);
+  --color-muted-foreground: var(--theme-color-muted-foreground);
+  --color-accent: var(--theme-color-accent);
+  --color-accent-foreground: var(--theme-color-accent-foreground);
+  --color-overlay: var(--theme-color-overlay);
+  --color-danger: var(--theme-color-danger);
+  --color-danger-foreground: var(--theme-color-danger-foreground);
+  --color-map-control: var(--theme-color-map-control);
+  --color-map-control-foreground: var(--theme-color-map-control-foreground);
+  --color-map-control-active: var(--theme-color-map-control-active);
+  --color-map-menu: var(--theme-color-map-menu);
+  --color-map-menu-foreground: var(--theme-color-map-menu-foreground);
+  --color-map-indicator: var(--theme-color-map-indicator);
+  --color-map-indicator-active: var(--theme-color-map-indicator-active);
+  --color-map-banner: var(--theme-color-map-banner);
+  --color-map-banner-foreground: var(--theme-color-map-banner-foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
