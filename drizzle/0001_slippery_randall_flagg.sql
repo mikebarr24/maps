@@ -1,0 +1,1 @@
+ALTER TABLE "activity_types" ADD COLUMN "source_urls" text[] DEFAULT ARRAY[]::text[] NOT NULL;
