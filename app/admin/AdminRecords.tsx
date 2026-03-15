@@ -255,7 +255,7 @@ function ActivityTypeCard({ activityType }: { activityType: ActivityTypeRecord }
                 <a
                   href={sourceUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="break-all text-foreground underline underline-offset-2"
                 >
                   {sourceUrl}
