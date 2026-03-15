@@ -48,6 +48,8 @@ jobs:
         run: npm run build
 
       - name: Run Playwright tests
+        env:
+          npm_config_ignore_scripts: true
         run: npm run test:e2e
 
       - name: Upload Playwright artifacts
