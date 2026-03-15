@@ -227,7 +227,7 @@ function ActivityTypeCard({ activityType }: { activityType: ActivityTypeRecord }
               placeholder={"https://www.nps.gov\nhttps://www.rei.com"}
             />
             <p className="m-0 text-sm text-muted-foreground">
-              Add one website URL per line.
+              Add one HTTPS website URL per line.
             </p>
             <FormFieldError message={updateState.fieldErrors?.sourceUrls} />
           </label>
@@ -255,7 +255,7 @@ function ActivityTypeCard({ activityType }: { activityType: ActivityTypeRecord }
                 <a
                   href={sourceUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="break-all text-foreground underline underline-offset-2"
                 >
                   {sourceUrl}
