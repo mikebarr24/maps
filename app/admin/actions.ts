@@ -13,9 +13,12 @@ export type AdminFormState = {
   submittedAt?: number;
 };
 
-const sourceUrlSchema = z.url({
-  message: "Enter valid URLs, one per line.",
-});
+const sourceUrlSchema = z
+  .url({ message: "Enter valid URLs, one per line." })
+  .refine(
+    (url) => ["http:", "https:"].includes(new URL(url).protocol),
+    { message: "Enter valid URLs, one per line." },
+  );
 
 const parseSourceUrls = (value: string, ctx: z.RefinementCtx) => {
   const sourceUrls = [
