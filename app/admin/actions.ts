@@ -13,9 +13,13 @@ export type AdminFormState = {
   submittedAt?: number;
 };
 
-const sourceUrlSchema = z.url({
-  message: "Enter valid URLs, one per line.",
-});
+const sourceUrlErrorMessage = "Enter valid HTTPS URLs, one per line.";
+
+const sourceUrlSchema = z
+  .url({ message: sourceUrlErrorMessage })
+  .refine((url) => new URL(url).protocol === "https:", {
+    message: sourceUrlErrorMessage,
+  });
 
 const parseSourceUrls = (value: string, ctx: z.RefinementCtx) => {
   const sourceUrls = [
@@ -34,7 +38,7 @@ const parseSourceUrls = (value: string, ctx: z.RefinementCtx) => {
   if (invalidSourceUrl) {
     ctx.addIssue({
       code: "custom",
-      message: "Enter valid URLs, one per line.",
+      message: sourceUrlErrorMessage,
     });
 
     return z.NEVER;

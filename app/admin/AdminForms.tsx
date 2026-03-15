@@ -130,7 +130,7 @@ export function ActivityTypeFormCard({
               placeholder={"https://www.nps.gov\nhttps://www.rei.com"}
             />
             <p className="m-0 text-sm text-muted-foreground">
-              Add one website URL per line to guide LLM research for this
+              Add one HTTPS website URL per line to guide LLM research for this
               activity type.
             </p>
             <FormFieldError message={activityTypeState.fieldErrors?.sourceUrls} />
