@@ -92,7 +92,7 @@ export function ActivityTypeFormCard({
       <SettingsOption
         leading={<FiLayers size={18} />}
         title="Activity type"
-        description="Examples: Climbing, Running, or Cycling."
+        description="Examples: Climbing, Running, or Cycling. You can also attach source websites for LLM research."
       >
         {!isSchemaReady ? (
           <p className="m-0 mb-4 text-sm text-danger">
@@ -117,6 +117,23 @@ export function ActivityTypeFormCard({
               placeholder="Enter an activity type name"
             />
             <FormFieldError message={activityTypeState.fieldErrors?.name} />
+          </label>
+
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium">Source URLs</span>
+            <textarea
+              name="sourceUrls"
+              rows={5}
+              maxLength={4000}
+              disabled={isActivityTypeFormDisabled}
+              className={settingsTextareaClassName}
+              placeholder={"https://www.nps.gov\nhttps://www.rei.com"}
+            />
+            <p className="m-0 text-sm text-muted-foreground">
+              Add one HTTPS website URL per line to guide LLM research for this
+              activity type.
+            </p>
+            <FormFieldError message={activityTypeState.fieldErrors?.sourceUrls} />
           </label>
 
           <div className="flex justify-start">

@@ -13,12 +13,51 @@ export type AdminFormState = {
   submittedAt?: number;
 };
 
+const sourceUrlErrorMessage = "Enter valid HTTPS URLs, one per line.";
+
+const sourceUrlSchema = z
+  .url({ message: sourceUrlErrorMessage })
+  .refine((url) => new URL(url).protocol === "https:", {
+    message: sourceUrlErrorMessage,
+  });
+
+const parseSourceUrls = (value: string, ctx: z.RefinementCtx) => {
+  const sourceUrls = [
+    ...new Set(
+      value
+        .split(/\r?\n/)
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
+  ];
+
+  const invalidSourceUrl = sourceUrls.find(
+    (sourceUrl) => !sourceUrlSchema.safeParse(sourceUrl).success,
+  );
+
+  if (invalidSourceUrl) {
+    ctx.addIssue({
+      code: "custom",
+      message: sourceUrlErrorMessage,
+    });
+
+    return z.NEVER;
+  }
+
+  return sourceUrls;
+};
+
 const activityTypeSchema = z.object({
   name: z
     .string()
     .trim()
     .min(1, "Name is required.")
     .max(120, "Name must be 120 characters or fewer."),
+  sourceUrls: z
+    .string()
+    .trim()
+    .max(4000, "Source URLs must be 4000 characters or fewer.")
+    .transform((value, ctx) => parseSourceUrls(value, ctx)),
 });
 
 const activitySchema = z.object({
@@ -48,7 +87,7 @@ const idSchema = z.object({
 const getFieldErrors = (
   error: z.ZodError,
 ): Record<string, string> | undefined => {
-  const flattened = error.flatten().fieldErrors as Record<
+  const flattened = z.flattenError(error).fieldErrors as Record<
     string,
     string[] | undefined
   >;
@@ -98,6 +137,7 @@ export async function createActivityTypeAction(
 ): Promise<AdminFormState> {
   const parsed = activityTypeSchema.safeParse({
     name: formData.get("name"),
+    sourceUrls: formData.get("sourceUrls") ?? "",
   });
 
   if (!parsed.success) {
@@ -112,6 +152,7 @@ export async function createActivityTypeAction(
   try {
     await db.insert(activityTypes).values({
       name: parsed.data.name,
+      sourceUrls: parsed.data.sourceUrls,
     });
   } catch (error) {
     return getErrorState("Unable to create activity type.", error);
@@ -177,6 +218,7 @@ export async function updateActivityTypeAction(
   });
   const parsedFields = activityTypeSchema.safeParse({
     name: formData.get("name"),
+    sourceUrls: formData.get("sourceUrls") ?? "",
   });
 
   if (!parsedId.success || !parsedFields.success) {
@@ -196,6 +238,7 @@ export async function updateActivityTypeAction(
       .update(activityTypes)
       .set({
         name: parsedFields.data.name,
+        sourceUrls: parsedFields.data.sourceUrls,
         updatedAt: new Date(),
       })
       .where(eq(activityTypes.id, parsedId.data.id));

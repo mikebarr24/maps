@@ -13,6 +13,8 @@ import { useFormStatus } from "react-dom";
 import { FiEdit2, FiLayers, FiSliders, FiTrash2 } from "react-icons/fi";
 import { toast } from "sonner";
 import Button from "@/app/components/Button";
+import FormFieldError from "@/app/components/FormFieldError";
+import StatusBadge from "@/app/components/StatusBadge";
 import {
   SettingsEmptyState,
   SettingsGroup,
@@ -32,6 +34,7 @@ import {
 type ActivityTypeRecord = {
   id: number;
   name: string;
+  sourceUrls: string[];
   updatedAt: string;
 };
 
@@ -99,26 +102,6 @@ function IconButton({
   );
 }
 
-function StatusBadge({
-  children,
-  tone = "default",
-}: {
-  children: ReactNode;
-  tone?: "default" | "accent";
-}) {
-  return (
-    <span
-      className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
-        tone === "accent"
-          ? "bg-accent text-accent-foreground"
-          : "bg-background text-muted-foreground"
-      }`}
-    >
-      {children}
-    </span>
-  );
-}
-
 function useActionToast(
   state: AdminFormState,
   {
@@ -176,7 +159,18 @@ function ActivityTypeCard({ activityType }: { activityType: ActivityTypeRecord }
     <SettingsOption
       leading={<FiLayers size={18} />}
       title={activityType.name}
+      description={
+        activityType.sourceUrls.length > 0
+          ? "Saved source websites for LLM research."
+          : "No source websites configured yet."
+      }
       meta={`Updated ${dateFormatter.format(new Date(activityType.updatedAt))}`}
+      badges={
+        <StatusBadge tone={activityType.sourceUrls.length > 0 ? "accent" : "default"}>
+          {activityType.sourceUrls.length} URL
+          {activityType.sourceUrls.length === 1 ? "" : "s"}
+        </StatusBadge>
+      }
       actions={
         !isEditing ? (
           <>
@@ -219,6 +213,23 @@ function ActivityTypeCard({ activityType }: { activityType: ActivityTypeRecord }
               defaultValue={activityType.name}
               className={settingsFieldClassName}
             />
+            <FormFieldError message={updateState.fieldErrors?.name} />
+          </label>
+
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium">Source URLs</span>
+            <textarea
+              name="sourceUrls"
+              rows={5}
+              maxLength={4000}
+              defaultValue={activityType.sourceUrls.join("\n")}
+              className={settingsTextareaClassName}
+              placeholder={"https://www.nps.gov\nhttps://www.rei.com"}
+            />
+            <p className="m-0 text-sm text-muted-foreground">
+              Add one HTTPS website URL per line.
+            </p>
+            <FormFieldError message={updateState.fieldErrors?.sourceUrls} />
           </label>
 
           <div className="flex flex-wrap gap-2">
@@ -235,6 +246,24 @@ function ActivityTypeCard({ activityType }: { activityType: ActivityTypeRecord }
             </Button>
           </div>
         </form>
+      ) : activityType.sourceUrls.length > 0 ? (
+        <div className="rounded-2xl bg-background px-4 py-3 text-sm leading-6 text-muted-foreground">
+          <p className="m-0 font-medium text-foreground">Source URLs</p>
+          <ul className="m-0 mt-2 list-disc space-y-2 pl-5">
+            {activityType.sourceUrls.map((sourceUrl) => (
+              <li key={sourceUrl}>
+                <a
+                  href={sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-foreground underline underline-offset-2"
+                >
+                  {sourceUrl}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
     </SettingsOption>
   );
