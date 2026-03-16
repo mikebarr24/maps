@@ -2,6 +2,8 @@
 
 When the user asks you to create a pull request and does not explicitly say otherwise, create it as a draft pull request by default.
 
+Always send a normal user-visible response in chat. Never rely on task completion UI alone to communicate that work is done.
+
 Theme and colour rules:
 - Keep the theme as a single source of truth in `app/styles/theme.css`.
 - Expose theme tokens to the app through Tailwind in `app/globals.css`.
