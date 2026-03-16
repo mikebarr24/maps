@@ -1,14 +1,17 @@
 import { z } from "zod";
+import { type OpenAiModel } from "./models";
 
 export enum AiProvider {
   OpenAI = "openai",
 }
 
+export type AiModel = OpenAiModel | (string & {});
+
 export type AiThinkingLevel = "low" | "medium" | "high";
 
 export type AiGenerationConfig = {
   provider: AiProvider;
-  model: string;
+  model: AiModel;
   thinkingLevel?: AiThinkingLevel;
 };
 
