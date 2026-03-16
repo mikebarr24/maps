@@ -9,6 +9,7 @@ import {
 } from "./contracts";
 import { getAiEnv } from "./env";
 import { OpenAiProvider } from "./openai";
+import { getOpenAiEnv } from "./providers/openai/env";
 
 type PublicAiConfig = Partial<AiGenerationConfig>;
 
@@ -31,21 +32,22 @@ type PublicGenerateObjectRequest<TSchema extends z.ZodTypeAny> =
 
 const getResolvedConfig = (config?: PublicAiConfig): AiGenerationConfig => {
   const env = getAiEnv();
+  const openAiEnv = getOpenAiEnv();
 
   return {
     provider: config?.provider ?? env.AI_PROVIDER,
-    model: config?.model ?? env.OPENAI_MODEL,
+    model: config?.model ?? openAiEnv.OPENAI_MODEL,
     thinkingLevel: config?.thinkingLevel,
   };
 };
 
 const getProviderClient = (config: AiGenerationConfig): AiProviderClient => {
-  const env = getAiEnv();
+  const openAiEnv = getOpenAiEnv();
 
   switch (config.provider) {
     case AiProvider.OpenAI:
       return new OpenAiProvider({
-        apiKey: env.OPENAI_API_KEY,
+        apiKey: openAiEnv.OPENAI_API_KEY,
       });
   }
 };
