@@ -7,6 +7,7 @@ When a markdown planning artifact is needed, store it in the repo's `plan/` dire
 For conversational questions, always answer in normal chat first. Do not use task completion tooling as a substitute for the answer.
 
 Theme and colour rules:
+
 - Keep the theme as a single source of truth in `app/styles/theme.css`.
 - Expose theme tokens to the app through Tailwind in `app/globals.css`.
 - Prefer Tailwind utility classes such as `bg-*`, `text-*`, and `border-*` throughout the app.
