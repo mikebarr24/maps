@@ -3,6 +3,12 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import {
+  AiConfigurationError,
+  AiGenerationError,
+  AiProvider,
+} from "@/app/ai/contracts";
+import { generateText } from "@/app/ai/service";
 import { db } from "@/db";
 import { activities, activityTypes } from "@/db/schema";
 
@@ -60,6 +66,16 @@ const activityTypeSchema = z.object({
     .transform((value, ctx) => parseSourceUrls(value, ctx)),
 });
 
+const activityDescriptionFieldSchema = z
+  .string()
+  .trim()
+  .max(4000, "Description must be 4000 characters or fewer.");
+
+const activityDescriptionSchema = activityDescriptionFieldSchema.min(
+  1,
+  "Description is required.",
+);
+
 const activitySchema = z.object({
   activityTypeId: z.coerce.number().int().positive("Choose an activity type."),
   title: z
@@ -67,11 +83,7 @@ const activitySchema = z.object({
     .trim()
     .min(1, "Title is required.")
     .max(160, "Title must be 160 characters or fewer."),
-  description: z
-    .string()
-    .trim()
-    .min(1, "Description is required.")
-    .max(4000, "Description must be 4000 characters or fewer."),
+  description: activityDescriptionFieldSchema,
   customPrompt: z
     .string()
     .trim()
@@ -131,6 +143,146 @@ const getErrorState = (
   };
 };
 
+const getDescriptionErrorState = (message: string): AdminFormState => ({
+  status: "error",
+  message,
+  fieldErrors: {
+    description: message,
+  },
+  submittedAt: Date.now(),
+});
+
+const buildActivityDescriptionPrompt = ({
+  activityTypeName,
+  title,
+  customPrompt,
+  sourceUrls,
+}: {
+  activityTypeName: string;
+  title: string;
+  customPrompt?: string;
+  sourceUrls: string[];
+}) =>
+  [
+    `Activity type: ${activityTypeName}`,
+    `Activity title: ${title}`,
+    customPrompt ? `Additional guidance: ${customPrompt}` : null,
+    sourceUrls.length > 0
+      ? `Context URLs: ${sourceUrls.join(", ")}`
+      : "Context URLs: none provided",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+async function resolveActivityDescription(fields: {
+  activityTypeId: number;
+  title: string;
+  description: string;
+  customPrompt?: string;
+}): Promise<
+  | {
+      description: string;
+    }
+  | {
+      errorState: AdminFormState;
+    }
+> {
+  if (fields.description) {
+    const parsedDescription = activityDescriptionSchema.safeParse(
+      fields.description,
+    );
+
+    if (!parsedDescription.success) {
+      return {
+        errorState: {
+          status: "error",
+          message: "Fix the highlighted fields and try again.",
+          fieldErrors: getFieldErrors(parsedDescription.error),
+          submittedAt: Date.now(),
+        },
+      };
+    }
+
+    return {
+      description: parsedDescription.data,
+    };
+  }
+
+  const [activityTypeRow] = await db
+    .select({
+      name: activityTypes.name,
+      sourceUrls: activityTypes.sourceUrls,
+    })
+    .from(activityTypes)
+    .where(eq(activityTypes.id, fields.activityTypeId))
+    .limit(1);
+
+  if (!activityTypeRow) {
+    return {
+      errorState: {
+        status: "error",
+        message: "Fix the highlighted fields and try again.",
+        fieldErrors: {
+          activityTypeId: "Choose an activity type.",
+        },
+        submittedAt: Date.now(),
+      },
+    };
+  }
+
+  try {
+    const generated = await generateText({
+      instructions:
+        "Write a plain-text description for an outdoor map activity filter. Keep it to one or two sentences, do not use markdown or bullet points, and do not mention AI, prompts, or source URLs.",
+      prompt: buildActivityDescriptionPrompt({
+        activityTypeName: activityTypeRow.name,
+        title: fields.title,
+        customPrompt: fields.customPrompt,
+        sourceUrls: activityTypeRow.sourceUrls,
+      }),
+      sessionId: `activity-description-${fields.activityTypeId}-${fields.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 40)}`,
+      config: {
+        provider: AiProvider.OpenAI,
+      },
+    });
+
+    const parsedDescription = activityDescriptionSchema.safeParse(generated.text);
+
+    if (!parsedDescription.success) {
+      return {
+        errorState: getDescriptionErrorState(
+          "AI generated an invalid description. Add one manually and try again.",
+        ),
+      };
+    }
+
+    return {
+      description: parsedDescription.data,
+    };
+  } catch (error) {
+    if (error instanceof AiConfigurationError) {
+      return {
+        errorState: getDescriptionErrorState(
+          "Add a description manually, or configure OPENAI_API_KEY to enable AI generation.",
+        ),
+      };
+    }
+
+    if (error instanceof AiGenerationError) {
+      return {
+        errorState: getDescriptionErrorState(
+          "Unable to generate a description right now. Add one manually and try again.",
+        ),
+      };
+    }
+
+    throw error;
+  }
+}
+
 export async function createActivityTypeAction(
   _prevState: AdminFormState,
   formData: FormData,
@@ -188,11 +340,17 @@ export async function createActivityAction(
     };
   }
 
+  const descriptionResult = await resolveActivityDescription(parsed.data);
+
+  if ("errorState" in descriptionResult) {
+    return descriptionResult.errorState;
+  }
+
   try {
     await db.insert(activities).values({
       activityTypeId: parsed.data.activityTypeId,
       title: parsed.data.title,
-      description: parsed.data.description,
+      description: descriptionResult.description,
       customPrompt: parsed.data.customPrompt || null,
       isPublished: parsed.data.isPublished,
     });
@@ -313,13 +471,19 @@ export async function updateActivityAction(
     };
   }
 
+  const descriptionResult = await resolveActivityDescription(parsedFields.data);
+
+  if ("errorState" in descriptionResult) {
+    return descriptionResult.errorState;
+  }
+
   try {
     await db
       .update(activities)
       .set({
         activityTypeId: parsedFields.data.activityTypeId,
         title: parsedFields.data.title,
-        description: parsedFields.data.description,
+        description: descriptionResult.description,
         customPrompt: parsedFields.data.customPrompt || null,
         isPublished: parsedFields.data.isPublished,
         updatedAt: new Date(),

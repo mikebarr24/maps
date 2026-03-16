@@ -248,13 +248,16 @@ export function ActivityFormCard({
             <span className="text-sm font-medium">Description</span>
             <textarea
               name="description"
-              required
               rows={5}
               maxLength={4000}
               disabled={isActivityFormDisabled}
               className={settingsTextareaClassName}
-              placeholder="Describe how this activity should appear in the map filters."
+              placeholder="Add a description, or leave this blank to generate one with AI when configured."
             />
+            <p className="m-0 text-sm text-muted-foreground">
+              Leave this blank to generate a short description with AI when
+              OPENAI_API_KEY is configured.
+            </p>
             <FormFieldError message={activityState.fieldErrors?.description} />
           </label>
 
