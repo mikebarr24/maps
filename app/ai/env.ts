@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AiProvider } from "./contracts";
+import { AiProvider } from "./types";
 const aiEnvSchema = z.object({
   AI_PROVIDER: z.enum(AiProvider).default(AiProvider.OpenAI),
 });

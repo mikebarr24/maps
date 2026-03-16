@@ -1,11 +1,5 @@
 import { z } from "zod";
-import { type OpenAiModel } from "./models";
-
-export enum AiProvider {
-  OpenAI = "openai",
-}
-
-export type AiModel = OpenAiModel | (string & {});
+import { type AiModel, AiProvider } from "./types";
 
 export type AiThinkingLevel = "low" | "medium" | "high";
 

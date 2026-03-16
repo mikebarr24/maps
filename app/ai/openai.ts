@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   AiConfigurationError,
   AiGenerationError,
-  AiProvider,
   type AiMessage,
   type AiProviderClient,
   type GenerateObjectRequest,
@@ -10,6 +9,7 @@ import {
   type GenerateTextRequest,
   type GenerateTextResult,
 } from "./contracts";
+import { AiProvider } from "./types";
 
 type OpenAiProviderOptions = {
   apiKey?: string;

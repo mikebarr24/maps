@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OpenAiModel } from "../../models";
+import { OpenAiModel } from "../../types";
 
 const openAiEnvSchema = z.object({
   OPENAI_API_KEY: z

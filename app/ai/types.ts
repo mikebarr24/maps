@@ -1,3 +1,9 @@
+export enum AiProvider {
+  OpenAI = "openai",
+}
+
+export type AiModel = OpenAiModel | (string & {});
+
 export enum OpenAiModel {
   // GPT-5
   Gpt54 = "gpt-5.4",

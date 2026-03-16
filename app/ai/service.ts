@@ -1,7 +1,6 @@
 import "server-only";
 import { z } from "zod";
 import {
-  AiProvider,
   type AiGenerationConfig,
   type AiProviderClient,
   type GenerateObjectResult,
@@ -10,6 +9,7 @@ import {
 import { getAiEnv } from "./env";
 import { OpenAiProvider } from "./openai";
 import { getOpenAiEnv } from "./providers/openai/env";
+import { AiProvider } from "./types";
 
 type PublicAiConfig = Partial<AiGenerationConfig>;
 
