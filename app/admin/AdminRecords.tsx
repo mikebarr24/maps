@@ -367,21 +367,17 @@ function ActivityCard({
             </label>
           </div>
 
-            <label className="flex flex-col gap-2">
-              <span className="text-sm font-medium">Description</span>
-              <textarea
-                name="description"
-                rows={4}
-                maxLength={4000}
-                defaultValue={activity.description}
-                className={settingsTextareaClassName}
-              />
-              <p className="m-0 text-sm text-muted-foreground">
-                Leave this blank to regenerate the description with AI when
-                OPENAI_API_KEY is configured.
-              </p>
-              <FormFieldError message={updateState.fieldErrors?.description} />
-            </label>
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium">Description</span>
+            <textarea
+              name="description"
+              required
+              rows={4}
+              maxLength={4000}
+              defaultValue={activity.description}
+              className={settingsTextareaClassName}
+            />
+          </label>
 
           <label className="flex flex-col gap-2">
             <span className="text-sm font-medium">Custom prompt</span>
