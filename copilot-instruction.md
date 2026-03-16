@@ -2,6 +2,10 @@
 
 When the user asks you to create a pull request and does not explicitly say otherwise, create it as a draft pull request by default.
 
+When a markdown planning artifact is needed, store it in the repo's `plan/` directory.
+
+For conversational questions, always answer in normal chat first. Do not use task completion tooling as a substitute for the answer.
+
 Theme and colour rules:
 - Keep the theme as a single source of truth in `app/styles/theme.css`.
 - Expose theme tokens to the app through Tailwind in `app/globals.css`.
