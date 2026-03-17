@@ -5,7 +5,12 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import type { AiThinkingLevel } from "../contracts";
 
-const supportedOpenAIModels = ["gpt-5-mini", "gpt-5"] as const;
+enum OpenAIModel {
+  Gpt5Mini = "gpt-5-mini",
+  Gpt5 = "gpt-5",
+}
+
+const supportedOpenAIModels = Object.values(OpenAIModel);
 
 const openAIEnvSchema = z.object({
   OPENAI_API_KEY: z.preprocess(
@@ -50,10 +55,8 @@ function getOpenAIProviderRegistry() {
 
 function isSupportedOpenAIModel(
   model: string,
-): model is (typeof supportedOpenAIModels)[number] {
-  return supportedOpenAIModels.includes(
-    model as (typeof supportedOpenAIModels)[number],
-  );
+): model is OpenAIModel {
+  return supportedOpenAIModels.includes(model as OpenAIModel);
 }
 
 function mapThinkingToOpenAIReasoningEffort(thinking: AiThinkingLevel) {
