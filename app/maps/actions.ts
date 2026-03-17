@@ -27,7 +27,7 @@ const searchRequestSchema = z.object({
 
 const mapSearchConfig: AiRequestConfig = {
   provider: AiProvider.OpenAI,
-  model: OpenAIModel.Gpt54Mini,
+  model: OpenAIModel.Gpt54,
   thinking: AiThinkingLevel.Low,
   tools: {
     webSearch: createOpenAIWebSearchTool(),

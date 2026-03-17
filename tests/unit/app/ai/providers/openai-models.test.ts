@@ -10,6 +10,7 @@ describe("app/ai/providers/openai-models", () => {
       expect.arrayContaining([
         OpenAIModel.Gpt5Mini,
         OpenAIModel.Gpt5,
+        OpenAIModel.Gpt54,
         OpenAIModel.Gpt54Mini,
         OpenAIModel.Gpt54Nano,
       ]),

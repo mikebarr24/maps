@@ -38,7 +38,7 @@ Use this document alongside `.github/copilot-instructions.md` when working on th
 
 ## Supported OpenAI behavior
 
-- Supported OpenAI models are currently `gpt-5-mini`, `gpt-5`, `gpt-5.4-mini`, and `gpt-5.4-nano`.
+- Supported OpenAI models are currently `gpt-5-mini`, `gpt-5`, `gpt-5.4`, `gpt-5.4-mini`, and `gpt-5.4-nano`.
 - Map repo thinking levels directly to OpenAI `reasoningEffort`:
   - `none` -> `none`
   - `minimal` -> `minimal`

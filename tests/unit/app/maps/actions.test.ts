@@ -112,7 +112,7 @@ describe("app/maps/actions", () => {
         ),
         config: expect.objectContaining({
           provider: "openai",
-          model: "gpt-5.4-mini",
+          model: "gpt-5.4",
           thinking: "low",
           tools: expect.objectContaining({
             webSearch: expect.objectContaining({
@@ -133,7 +133,7 @@ describe("app/maps/actions", () => {
         ),
         config: expect.objectContaining({
           provider: "openai",
-          model: "gpt-5.4-mini",
+          model: "gpt-5.4",
           thinking: "low",
           tools: expect.objectContaining({
             webSearch: expect.objectContaining({
@@ -157,7 +157,7 @@ describe("app/maps/actions", () => {
         hasCustomPrompt: true,
         sourceUrlCount: 2,
         provider: "openai",
-        model: "gpt-5.4-mini",
+        model: "gpt-5.4",
         thinking: "low",
       },
     });
@@ -199,7 +199,7 @@ describe("app/maps/actions", () => {
           hasCustomPrompt: true,
           sourceUrlCount: 2,
           provider: "openai",
-          model: "gpt-5.4-mini",
+          model: "gpt-5.4",
           thinking: "low",
         },
       }),
