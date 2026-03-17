@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AiProvider, type AiRequestConfig } from "@/app/ai/contracts";
 import { generateStructuredOutput } from "@/app/ai/service";
 import { db } from "@/db";
+import { logger } from "@/db/logger";
 import { activities, activityTypes } from "@/db/schema";
 import type { MapSearchFormState } from "./types";
 
@@ -105,6 +106,35 @@ Use concise descriptions.
 `.trim();
 }
 
+const logMapSearchError = async ({
+  eventType,
+  message,
+  error,
+  metadata,
+}: {
+  eventType: string;
+  message: string;
+  error: unknown;
+  metadata?: Record<string, unknown>;
+}) => {
+  try {
+    await logger.error({
+      eventType,
+      source: "maps.actions",
+      message,
+      error,
+      metadata,
+    });
+  } catch (loggingError) {
+    console.error("[maps.actions] Failed to write error log", {
+      eventType,
+      actionError: error,
+      loggingError,
+      metadata,
+    });
+  }
+};
+
 export async function searchActivitiesAction(
   _prevState: MapSearchFormState,
   formData: FormData,
@@ -183,7 +213,24 @@ export async function searchActivitiesAction(
       activityId: parsed.data.activityId,
       locationQuery: parsed.data.where,
     };
-  } catch {
+  } catch (error) {
+    await logMapSearchError({
+      eventType: "maps.search.failed",
+      message: "Failed to search for map activity places",
+      error,
+      metadata: {
+        activityId: selectedActivity.id,
+        activityTitle: selectedActivity.title,
+        activityTypeName: selectedActivity.activityTypeName,
+        locationQueryLength: parsed.data.where.length,
+        hasCustomPrompt: selectedActivity.customPrompt !== null,
+        sourceUrlCount: selectedActivity.sourceUrls.length,
+        provider: mapSearchConfig.provider,
+        model: mapSearchConfig.model,
+        thinking: mapSearchConfig.thinking,
+      },
+    });
+
     return {
       status: "error",
       message: "Unable to search for places right now. Please try again.",
