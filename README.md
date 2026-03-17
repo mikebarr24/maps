@@ -27,7 +27,8 @@ On the admin route you can create, update, and delete both record types. Source 
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 24+
+- npm 11
 - Docker Desktop or another local Docker runtime
 
 ### Environment
@@ -51,6 +52,12 @@ OPENAI_API_KEY=your_openai_api_key
 ```
 
 ### Start the app
+
+If you use `nvm`, the repo includes a `.nvmrc` file so you can align with CI before installing dependencies:
+
+```bash
+nvm use
+```
 
 Install dependencies, then start the dev server:
 
