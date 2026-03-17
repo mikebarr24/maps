@@ -38,6 +38,13 @@ async function runDockerCommand(args) {
   }
 }
 
+function isMissingContainerError(error) {
+  return (
+    error instanceof Error &&
+    error.message.includes(`No such object: ${CONTAINER_NAME}`)
+  );
+}
+
 async function readContainerState() {
   const { stdout } = await runDockerCommand([
     "inspect",
@@ -54,6 +61,18 @@ async function readContainerState() {
   }
 
   return JSON.parse(serializedState);
+}
+
+async function readContainerStateOrNull() {
+  try {
+    return await readContainerState();
+  } catch (error) {
+    if (isMissingContainerError(error)) {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 async function waitForHealthyContainer() {
@@ -92,7 +111,14 @@ async function waitForHealthyContainer() {
 
 async function ensurePostgresContainer() {
   console.log(`Ensuring Docker service "${COMPOSE_SERVICE}" is running...`);
-  await runDockerCommand(["compose", "up", "-d", COMPOSE_SERVICE]);
+  const existingState = await readContainerStateOrNull();
+
+  if (!existingState) {
+    await runDockerCommand(["compose", "up", "-d", COMPOSE_SERVICE]);
+  } else if (!existingState.Running) {
+    await runDockerCommand(["start", CONTAINER_NAME]);
+  }
+
   await waitForHealthyContainer();
   console.log(`Docker container "${CONTAINER_NAME}" is ready.`);
 }
