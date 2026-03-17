@@ -7,9 +7,17 @@ export enum AiProvider {
 
 export const aiProviders = [AiProvider.OpenAI, AiProvider.Anthropic] as const;
 
-export const aiThinkingLevels = ["minimal", "low", "medium", "high"] as const;
+export enum AiThinkingLevel {
+  Minimal = "minimal",
+  Low = "low",
+  Medium = "medium",
+  High = "high",
+}
 
-export type AiThinkingLevel = (typeof aiThinkingLevels)[number];
+export const aiThinkingLevels = Object.values(AiThinkingLevel) as [
+  AiThinkingLevel,
+  ...AiThinkingLevel[],
+];
 
 export type AiRequestConfig = {
   provider: AiProvider;

@@ -2,7 +2,12 @@
 
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { AiProvider, type AiRequestConfig } from "@/app/ai/contracts";
+import {
+  AiProvider,
+  AiThinkingLevel,
+  type AiRequestConfig,
+} from "@/app/ai/contracts";
+import { OpenAIModel } from "@/app/ai/providers/openai-models";
 import { generateStructuredOutput } from "@/app/ai/service";
 import { db } from "@/db";
 import { logger } from "@/db/logger";
@@ -21,8 +26,8 @@ const searchRequestSchema = z.object({
 
 const mapSearchConfig: AiRequestConfig = {
   provider: AiProvider.OpenAI,
-  model: "gpt-5-mini",
-  thinking: "low",
+  model: OpenAIModel.Gpt5Mini,
+  thinking: AiThinkingLevel.Low,
 };
 
 const systemInstructions = `

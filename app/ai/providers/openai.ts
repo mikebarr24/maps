@@ -3,14 +3,8 @@ import "server-only";
 import { createProviderRegistry } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
-import type { AiThinkingLevel } from "../contracts";
-
-enum OpenAIModel {
-  Gpt5Mini = "gpt-5-mini",
-  Gpt5 = "gpt-5",
-}
-
-const supportedOpenAIModels = Object.values(OpenAIModel);
+import { AiThinkingLevel } from "../contracts";
+import { OpenAIModel, supportedOpenAIModels } from "./openai-models";
 
 const openAIEnvSchema = z.object({
   OPENAI_API_KEY: z.preprocess(
@@ -61,10 +55,10 @@ function isSupportedOpenAIModel(
 
 function mapThinkingToOpenAIReasoningEffort(thinking: AiThinkingLevel) {
   return {
-    minimal: "minimal",
-    low: "low",
-    medium: "medium",
-    high: "high",
+    [AiThinkingLevel.Minimal]: "minimal",
+    [AiThinkingLevel.Low]: "low",
+    [AiThinkingLevel.Medium]: "medium",
+    [AiThinkingLevel.High]: "high",
   }[thinking];
 }
 
