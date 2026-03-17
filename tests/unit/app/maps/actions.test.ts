@@ -87,6 +87,7 @@ describe("app/maps/actions", () => {
     const formData = new FormData();
 
     formData.set("activityId", "42");
+    formData.set("distanceKm", "25");
     formData.set("where", "Peak District");
 
     const result = await searchActivitiesAction(
@@ -129,7 +130,7 @@ describe("app/maps/actions", () => {
           "Use websites only after choosing a candidate place, and only to capture one supporting original URL plus very accurate coordinates for that place.",
         ),
         prompt: expect.stringContaining(
-          "Do not use web results to brainstorm extra venues or gather descriptive prose.",
+          "Keep the results realistically within about 25km of the requested location.",
         ),
         config: expect.objectContaining({
           provider: "openai",
@@ -153,6 +154,7 @@ describe("app/maps/actions", () => {
         activityId: 42,
         activityTitle: "Gritstone climbing",
         activityTypeName: "Climbing",
+        distanceKm: 25,
         locationQueryLength: 13,
         hasCustomPrompt: true,
         sourceUrlCount: 2,
@@ -171,6 +173,7 @@ describe("app/maps/actions", () => {
 
     loggerErrorMock.mockRejectedValueOnce(new Error("event_logs unavailable"));
     formData.set("activityId", "42");
+    formData.set("distanceKm", "25");
     formData.set("where", "Peak District");
 
     const result = await searchActivitiesAction(
@@ -195,6 +198,7 @@ describe("app/maps/actions", () => {
           activityId: 42,
           activityTitle: "Gritstone climbing",
           activityTypeName: "Climbing",
+          distanceKm: 25,
           locationQueryLength: 13,
           hasCustomPrompt: true,
           sourceUrlCount: 2,
@@ -214,6 +218,7 @@ describe("app/maps/actions", () => {
     const formData = new FormData();
 
     formData.set("activityId", "42");
+    formData.set("distanceKm", "25");
     formData.set("where", "Peak District");
 
     const result = await searchActivitiesAction(
@@ -236,6 +241,30 @@ describe("app/maps/actions", () => {
       error: dbError,
       metadata: { activityId: 42 },
     });
+  });
+
+  it("rejects distances outside the supported 5km steps", async () => {
+    const formData = new FormData();
+
+    formData.set("activityId", "42");
+    formData.set("distanceKm", "12");
+    formData.set("where", "Peak District");
+
+    const result = await searchActivitiesAction(
+      { status: "idle", results: [] },
+      formData,
+    );
+
+    expect(result).toMatchObject({
+      status: "error",
+      message: "Fix the highlighted fields and try again.",
+      results: [],
+      fieldErrors: {
+        distanceKm: "Distance must be in 5km steps.",
+      },
+    });
+    expect(generateStructuredOutputMock).not.toHaveBeenCalled();
+    expect(loggerErrorMock).not.toHaveBeenCalled();
   });
 
   it("keeps originalUrl as a plain string in JSON schema while validating web URLs at runtime", () => {

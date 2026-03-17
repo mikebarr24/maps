@@ -57,6 +57,10 @@ const googlePinIcon = new Icon({
 
 const fieldClassName =
   "w-full rounded-2xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition focus:border-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-60";
+const distanceRangeMinKm = 5;
+const distanceRangeMaxKm = 50;
+const distanceRangeStepKm = 5;
+const defaultDistanceKm = 25;
 
 type RainViewerResponse = {
   host?: string;
@@ -184,6 +188,7 @@ export default function UKMap({
     null,
   );
   const [locationQuery, setLocationQuery] = useState("");
+  const [distanceKm, setDistanceKm] = useState(defaultDistanceKm);
   const [activeResults, setActiveResults] = useState<MapPlaceResult[]>([]);
   const [activeSearchState, setActiveSearchState] = useState<{
     activityTitle: string;
@@ -330,6 +335,10 @@ export default function UKMap({
 
   const handleLocationQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     setLocationQuery(event.currentTarget.value);
+  };
+
+  const handleDistanceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDistanceKm(Number(event.currentTarget.value));
   };
 
   const hasActivities = activityTypes.length > 0;
@@ -528,6 +537,38 @@ export default function UKMap({
                           search nearby options.
                         </p>
                         <FormFieldError message={searchState.fieldErrors?.where} />
+                      </label>
+
+                      <label className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-medium">
+                            Search radius
+                          </span>
+                          <span className="rounded-full bg-sky-50 px-3 py-1 text-sm font-semibold text-sky-700">
+                            {distanceKm}km
+                          </span>
+                        </div>
+                        <input
+                          className="w-full accent-sky-700"
+                          max={distanceRangeMaxKm}
+                          min={distanceRangeMinKm}
+                          name="distanceKm"
+                          onChange={handleDistanceChange}
+                          step={distanceRangeStepKm}
+                          type="range"
+                          value={distanceKm}
+                        />
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{distanceRangeMinKm}km</span>
+                          <span>{distanceRangeMaxKm}km</span>
+                        </div>
+                        <p className="m-0 text-sm text-muted-foreground">
+                          Choose how far from your selected location we should
+                          look for matching places.
+                        </p>
+                        <FormFieldError
+                          message={searchState.fieldErrors?.distanceKm}
+                        />
                       </label>
 
                       <FormFieldError

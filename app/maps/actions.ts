@@ -18,6 +18,12 @@ import type { MapSearchFormState } from "./types";
 
 const searchRequestSchema = z.object({
   activityId: z.coerce.number().int().positive("Choose an activity."),
+  distanceKm: z
+    .coerce.number()
+    .int()
+    .min(5, "Distance must be between 5km and 50km.")
+    .max(50, "Distance must be between 5km and 50km.")
+    .refine((value) => value % 5 === 0, "Distance must be in 5km steps."),
   where: z
     .string()
     .trim()
@@ -75,6 +81,7 @@ function buildPrompt(input: {
   activityTitle: string;
   activityDescription: string;
   customPrompt: string | null;
+  distanceKm: number;
   sourceUrls: string[];
   where: string;
 }) {
@@ -88,6 +95,9 @@ function buildPrompt(input: {
   return `
 Requested location:
 ${input.where}
+
+Search radius:
+${input.distanceKm}km
 
 Activity type:
 ${input.activityTypeName}
@@ -105,6 +115,7 @@ Source URLs:
 ${sourceUrls}
 
 Find real places for this activity in or near the requested location.
+Keep the results realistically within about ${input.distanceKm}km of the requested location.
 Make the suggestions specific and varied rather than repeating similar venues.
 Use concise descriptions.
 Decide on likely places from the activity context, requested area, and your own general knowledge.
@@ -151,6 +162,7 @@ export async function searchActivitiesAction(
 ): Promise<MapSearchFormState> {
   const parsed = searchRequestSchema.safeParse({
     activityId: formData.get("activityId"),
+    distanceKm: formData.get("distanceKm"),
     where: formData.get("where"),
   });
 
@@ -236,6 +248,7 @@ export async function searchActivitiesAction(
         activityTitle: selectedActivity.title,
         activityDescription: selectedActivity.description,
         customPrompt: selectedActivity.customPrompt,
+        distanceKm: parsed.data.distanceKm,
         sourceUrls: selectedActivity.sourceUrls,
         where: parsed.data.where,
       }),
@@ -263,6 +276,7 @@ export async function searchActivitiesAction(
         activityId: selectedActivity.id,
         activityTitle: selectedActivity.title,
         activityTypeName: selectedActivity.activityTypeName,
+        distanceKm: parsed.data.distanceKm,
         locationQueryLength: parsed.data.where.length,
         hasCustomPrompt: selectedActivity.customPrompt !== null,
         sourceUrlCount: selectedActivity.sourceUrls.length,
