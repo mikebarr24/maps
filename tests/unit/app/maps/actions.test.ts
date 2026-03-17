@@ -206,6 +206,38 @@ describe("app/maps/actions", () => {
     );
   });
 
+  it("returns a controlled error state when the database lookup fails", async () => {
+    const dbError = new Error("connection timeout");
+
+    limitMock.mockRejectedValueOnce(dbError);
+
+    const formData = new FormData();
+
+    formData.set("activityId", "42");
+    formData.set("where", "Peak District");
+
+    const result = await searchActivitiesAction(
+      { status: "idle", results: [] },
+      formData,
+    );
+
+    expect(result).toMatchObject({
+      status: "error",
+      message: "Unable to search for places right now. Please try again.",
+      results: [],
+      activityId: 42,
+      locationQuery: "Peak District",
+    });
+    expect(generateStructuredOutputMock).not.toHaveBeenCalled();
+    expect(loggerErrorMock).toHaveBeenCalledWith({
+      eventType: "maps.search.db_lookup_failed",
+      source: "maps.actions",
+      message: "Failed to look up selected activity",
+      error: dbError,
+      metadata: { activityId: 42 },
+    });
+  });
+
   it("keeps originalUrl as a plain string in JSON schema while validating web URLs at runtime", () => {
     const jsonSchema = z.toJSONSchema(searchResultsSchema);
 
@@ -250,6 +282,26 @@ describe("app/maps/actions", () => {
           },
         ],
       }).success,
+    ).toBe(false);
+  });
+
+  it("rejects results arrays with more than 8 items", () => {
+    const validItem = {
+      title: "Some place",
+      latitude: 53.34,
+      longitude: -1.62,
+      shortDescription: "A short description.",
+      originalUrl: "https://example.com/place",
+    };
+
+    expect(
+      searchResultsSchema.safeParse({ results: Array(8).fill(validItem) })
+        .success,
+    ).toBe(true);
+
+    expect(
+      searchResultsSchema.safeParse({ results: Array(9).fill(validItem) })
+        .success,
     ).toBe(false);
   });
 });

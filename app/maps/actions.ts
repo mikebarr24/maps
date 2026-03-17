@@ -164,32 +164,63 @@ export async function searchActivitiesAction(
     };
   }
 
-  const [selectedActivity] = await db
-    .select({
-      id: activities.id,
-      title: activities.title,
-      description: activities.description,
-      customPrompt: activities.customPrompt,
-      activityTypeName: activityTypes.name,
-      sourceUrls: activityTypes.sourceUrls,
-    })
-    .from(activities)
-    .innerJoin(activityTypes, eq(activities.activityTypeId, activityTypes.id))
-    .where(
-      and(
-        eq(activities.id, parsed.data.activityId),
-        eq(activities.isPublished, true),
-      ),
-    )
-    .limit(1);
+  let selectedActivity: {
+    id: number;
+    title: string;
+    description: string;
+    customPrompt: string | null;
+    activityTypeName: string;
+    sourceUrls: string[];
+  };
 
-  if (!selectedActivity) {
+  try {
+    const [row] = await db
+      .select({
+        id: activities.id,
+        title: activities.title,
+        description: activities.description,
+        customPrompt: activities.customPrompt,
+        activityTypeName: activityTypes.name,
+        sourceUrls: activityTypes.sourceUrls,
+      })
+      .from(activities)
+      .innerJoin(activityTypes, eq(activities.activityTypeId, activityTypes.id))
+      .where(
+        and(
+          eq(activities.id, parsed.data.activityId),
+          eq(activities.isPublished, true),
+        ),
+      )
+      .limit(1);
+
+    if (!row) {
+      return {
+        status: "error",
+        message: "Choose a published activity before searching.",
+        fieldErrors: {
+          activityId: "Choose an activity.",
+        },
+        submittedAt: Date.now(),
+        results: [],
+        activityId: parsed.data.activityId,
+        locationQuery: parsed.data.where,
+      };
+    }
+
+    selectedActivity = row;
+  } catch (error) {
+    await logMapSearchError({
+      eventType: "maps.search.db_lookup_failed",
+      message: "Failed to look up selected activity",
+      error,
+      metadata: {
+        activityId: parsed.data.activityId,
+      },
+    });
+
     return {
       status: "error",
-      message: "Choose a published activity before searching.",
-      fieldErrors: {
-        activityId: "Choose an activity.",
-      },
+      message: "Unable to search for places right now. Please try again.",
       submittedAt: Date.now(),
       results: [],
       activityId: parsed.data.activityId,

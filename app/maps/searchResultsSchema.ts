@@ -14,15 +14,17 @@ const isPublicWebUrl = (value: string) => {
 };
 
 export const searchResultsSchema = z.object({
-  results: z.array(
-    z.object({
-      title: z.string().trim().min(1).max(160),
-      latitude: z.number().min(-90).max(90),
-      longitude: z.number().min(-180).max(180),
-      shortDescription: z.string().trim().min(1).max(280),
-      originalUrl: z.string().trim().refine(isPublicWebUrl, {
-        message: originalUrlErrorMessage,
+  results: z
+    .array(
+      z.object({
+        title: z.string().trim().min(1).max(160),
+        latitude: z.number().min(-90).max(90),
+        longitude: z.number().min(-180).max(180),
+        shortDescription: z.string().trim().min(1).max(280),
+        originalUrl: z.string().trim().refine(isPublicWebUrl, {
+          message: originalUrlErrorMessage,
+        }),
       }),
-    }),
-  ),
+    )
+    .max(8),
 });
