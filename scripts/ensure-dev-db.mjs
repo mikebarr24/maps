@@ -45,6 +45,15 @@ function isMissingContainerError(error) {
   );
 }
 
+function isContainerNameConflictError(error) {
+  return (
+    error instanceof Error &&
+    error.message.includes(
+      `container name "/${CONTAINER_NAME}" is already in use`,
+    )
+  );
+}
+
 async function readContainerState() {
   const { stdout } = await runDockerCommand([
     "inspect",
@@ -72,6 +81,33 @@ async function readContainerStateOrNull() {
     }
 
     throw error;
+  }
+}
+
+async function ensureComposeService() {
+  try {
+    await runDockerCommand(["compose", "up", "-d", COMPOSE_SERVICE]);
+    return;
+  } catch (error) {
+    if (!isContainerNameConflictError(error)) {
+      throw error;
+    }
+  }
+
+  const existingState = await readContainerStateOrNull();
+
+  if (!existingState) {
+    throw new Error(
+      `Docker Compose could not manage "${CONTAINER_NAME}", and no existing container was found to reuse.`,
+    );
+  }
+
+  console.log(
+    `Docker container "${CONTAINER_NAME}" already exists outside Compose state; reusing it.`,
+  );
+
+  if (!existingState.Running) {
+    await runDockerCommand(["start", CONTAINER_NAME]);
   }
 }
 
@@ -111,14 +147,7 @@ async function waitForHealthyContainer() {
 
 async function ensurePostgresContainer() {
   console.log(`Ensuring Docker service "${COMPOSE_SERVICE}" is running...`);
-  const existingState = await readContainerStateOrNull();
-
-  if (!existingState) {
-    await runDockerCommand(["compose", "up", "-d", COMPOSE_SERVICE]);
-  } else if (!existingState.Running) {
-    await runDockerCommand(["start", CONTAINER_NAME]);
-  }
-
+  await ensureComposeService();
   await waitForHealthyContainer();
   console.log(`Docker container "${CONTAINER_NAME}" is ready.`);
 }
