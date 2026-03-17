@@ -2,14 +2,11 @@ import "server-only";
 import { z } from "zod";
 import {
   type AiGenerationConfig,
-  type AiProviderClient,
   type GenerateObjectResult,
   type GenerateTextResult,
 } from "./contracts";
 import { getAiEnv } from "./env";
-import { OpenAiProvider } from "./openai";
-import { getOpenAiEnv } from "./providers/openai/env";
-import { AiProvider } from "./types";
+import { getDefaultModelForProvider, getProviderClient } from "./providers";
 
 type PublicAiConfig = Partial<AiGenerationConfig>;
 
@@ -32,24 +29,13 @@ type PublicGenerateObjectRequest<TSchema extends z.ZodTypeAny> =
 
 const getResolvedConfig = (config?: PublicAiConfig): AiGenerationConfig => {
   const env = getAiEnv();
-  const openAiEnv = getOpenAiEnv();
+  const provider = config?.provider ?? env.AI_PROVIDER;
 
   return {
-    provider: config?.provider ?? env.AI_PROVIDER,
-    model: config?.model ?? openAiEnv.OPENAI_MODEL,
+    provider,
+    model: config?.model ?? getDefaultModelForProvider(provider),
     thinkingLevel: config?.thinkingLevel,
   };
-};
-
-const getProviderClient = (config: AiGenerationConfig): AiProviderClient => {
-  const openAiEnv = getOpenAiEnv();
-
-  switch (config.provider) {
-    case AiProvider.OpenAI:
-      return new OpenAiProvider({
-        apiKey: openAiEnv.OPENAI_API_KEY,
-      });
-  }
 };
 
 export async function generateText(

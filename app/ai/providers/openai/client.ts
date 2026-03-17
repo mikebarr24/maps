@@ -8,8 +8,8 @@ import {
   type GenerateObjectResult,
   type GenerateTextRequest,
   type GenerateTextResult,
-} from "./contracts";
-import { AiProvider } from "./types";
+} from "../../contracts";
+import { AiProvider } from "../../types";
 
 type OpenAiProviderOptions = {
   apiKey?: string;
