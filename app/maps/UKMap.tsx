@@ -18,11 +18,12 @@ import {
   TileLayer,
   useMap,
 } from "react-leaflet";
-import { FiArrowLeft, FiFilter, FiLayers, FiMapPin } from "react-icons/fi";
+import { FiFilter, FiLayers, FiMapPin } from "react-icons/fi";
 import { toast } from "sonner";
 import Button from "@/app/components/Button";
 import FormFieldError from "@/app/components/FormFieldError";
 import Popup from "@/app/components/Popup";
+import FilterPopupTitle from "./FilterPopupTitle";
 import { searchActivitiesAction } from "./actions";
 import type {
   MapPlaceResult,
@@ -422,7 +423,15 @@ export default function UKMap({
       {isFilterOpen ? (
         <Popup
           onClose={() => setIsFilterOpen(false)}
-          title={<h2 className="text-lg font-semibold">Filter</h2>}
+          title={
+            <FilterPopupTitle
+              canGoBack={selectedActivityType !== null}
+              onBack={() => {
+                setSelectedActivityTypeId(null);
+                setSelectedActivityId(null);
+              }}
+            />
+          }
         >
           <div className="space-y-6">
             {!isSchemaReady ? (
@@ -442,27 +451,13 @@ export default function UKMap({
               <>
                 {selectedActivityType ? (
                   <div className="space-y-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="m-0 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                          Activity type
-                        </p>
-                        <h3 className="m-0 mt-1 text-xl font-semibold">
-                          {selectedActivityType.name}
-                        </h3>
-                      </div>
-                      <Button
-                        onClick={() => {
-                          setSelectedActivityTypeId(null);
-                          setSelectedActivityId(null);
-                        }}
-                        size="sm"
-                        variant="ghost"
-                        className="gap-2"
-                      >
-                        <FiArrowLeft size={16} />
-                        Back
-                      </Button>
+                    <div>
+                      <p className="m-0 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                        Activity type
+                      </p>
+                      <h3 className="m-0 mt-1 text-xl font-semibold">
+                        {selectedActivityType.name}
+                      </h3>
                     </div>
 
                     <div className="space-y-2">
