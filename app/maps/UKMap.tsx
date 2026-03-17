@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { type LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer } from "react-leaflet";
-import { FiLayers } from "react-icons/fi";
+import { FiFilter, FiLayers } from "react-icons/fi";
 import Button from "@/app/components/Button";
+import Popup from "@/app/components/Popup";
 
 const ukAndNorthernIrelandBounds: LatLngBoundsExpression = [
   [49.8, -8.9],
@@ -49,6 +50,7 @@ export default function UKMap() {
   const [isRainLoading, setIsRainLoading] = useState(false);
   const [rainError, setRainError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const controlsRef = useRef<HTMLDivElement | null>(null);
   const menuId = "map-controls-menu";
 
@@ -120,58 +122,91 @@ export default function UKMap() {
 
   return (
     <div className="relative h-full w-full">
-      <div ref={controlsRef} className="absolute right-4 bottom-12 z-1000">
-        {isMenuOpen ? (
-          <div
-            id={menuId}
-            aria-label="Map options"
-            role="group"
-            className="absolute right-0 bottom-13 min-w-44 overflow-hidden rounded-lg bg-map-menu text-map-menu-foreground"
-          >
-            <Button
-              aria-pressed={showRain}
-              fullWidth
-              isLoading={isRainLoading}
-              onClick={() => {
-                setIsMenuOpen(false);
-                void toggleRainOverlay();
-              }}
-              size="sm"
-              variant="inverseGhost"
-              className={`flex w-full items-center justify-between gap-2.5 bg-transparent px-3 py-2.5 text-sm text-map-menu-foreground ${
-                isRainLoading ? "cursor-wait" : "cursor-pointer"
-              }`}
-            >
-              <span>{isRainLoading ? "Loading rain..." : "Show rain"}</span>
-              <span
-                aria-hidden="true"
-                className={`h-2.5 w-2.5 rounded-full ${
-                  showRain ? "bg-map-indicator-active" : "bg-map-indicator"
-                }`}
-              />
-            </Button>
-          </div>
-        ) : null}
-
+      <div
+        ref={controlsRef}
+        className="absolute right-4 bottom-12 z-1000 flex flex-col items-end gap-3"
+      >
         <Button
-          aria-expanded={isMenuOpen}
-          aria-haspopup="menu"
-          aria-label="Map options"
-          aria-controls={menuId}
+          aria-expanded={isFilterOpen}
+          aria-haspopup="dialog"
+          aria-label="Open filters"
           onClick={() => {
-            setIsMenuOpen((current) => !current);
+            setIsMenuOpen(false);
+            setIsFilterOpen(true);
           }}
           size="icon"
           variant="secondary"
           className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-map-control-foreground ${
-            isMenuOpen || showRain
+            isFilterOpen
               ? "border-map-control-active bg-map-control-active hover:border-map-control-active hover:bg-map-control-active"
               : "border-map-control bg-map-control hover:border-map-control hover:bg-map-control"
           }`}
         >
-          <FiLayers size={18} />
+          <FiFilter size={18} />
         </Button>
+
+        <div className="relative">
+          {isMenuOpen ? (
+            <div
+              id={menuId}
+              aria-label="Map options"
+              role="group"
+              className="absolute right-0 bottom-13 min-w-44 overflow-hidden rounded-lg bg-map-menu text-map-menu-foreground"
+            >
+              <Button
+                aria-pressed={showRain}
+                fullWidth
+                isLoading={isRainLoading}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  void toggleRainOverlay();
+                }}
+                size="sm"
+                variant="inverseGhost"
+                className={`flex w-full items-center justify-between gap-2.5 bg-transparent px-3 py-2.5 text-sm text-map-menu-foreground ${
+                  isRainLoading ? "cursor-wait" : "cursor-pointer"
+                }`}
+              >
+                <span>{isRainLoading ? "Loading rain..." : "Show rain"}</span>
+                <span
+                  aria-hidden="true"
+                  className={`h-2.5 w-2.5 rounded-full ${
+                    showRain ? "bg-map-indicator-active" : "bg-map-indicator"
+                  }`}
+                />
+              </Button>
+            </div>
+          ) : null}
+
+          <Button
+            aria-expanded={isMenuOpen}
+            aria-haspopup="menu"
+            aria-label="Map options"
+            aria-controls={menuId}
+            onClick={() => {
+              setIsMenuOpen((current) => !current);
+            }}
+            size="icon"
+            variant="secondary"
+            className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-map-control-foreground ${
+              isMenuOpen || showRain
+                ? "border-map-control-active bg-map-control-active hover:border-map-control-active hover:bg-map-control-active"
+                : "border-map-control bg-map-control hover:border-map-control hover:bg-map-control"
+            }`}
+          >
+            <FiLayers size={18} />
+          </Button>
+        </div>
       </div>
+
+      {isFilterOpen ? (
+        <Popup
+          onClose={() => setIsFilterOpen(false)}
+          title={<h2 className="text-lg font-semibold">Filter</h2>}
+        >
+          {null}
+        </Popup>
+      ) : null}
 
       {rainError ? (
         <p className="absolute top-4 right-4 z-1000 m-0 max-w-70 rounded-lg bg-map-banner px-3 py-2 text-map-banner-foreground">
