@@ -54,7 +54,7 @@ export default function Popup({ children, onClose, title }: PopupProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[2000] flex items-center justify-center px-4 sm:px-0"
+      className="fixed inset-0 z-2000 flex items-center justify-center px-4 sm:px-0"
       role="dialog"
       aria-modal="true"
     >
