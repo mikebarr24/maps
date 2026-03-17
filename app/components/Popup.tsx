@@ -65,16 +65,16 @@ export default function Popup({ children, onClose }: PopupProps) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-lg focus:outline-none"
+        className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 pt-16 shadow-lg focus:outline-none"
       >
         <Button
           aria-label="Close popup"
-          className="absolute right-4 top-4"
+          className="absolute right-4 top-4 shadow-sm"
           onClick={onClose}
           size="icon"
-          variant="ghost"
+          variant="secondary"
         >
-          <FiX size={18} />
+          <FiX aria-hidden="true" size={18} />
         </Button>
         {children}
       </div>
