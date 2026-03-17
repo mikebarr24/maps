@@ -7,6 +7,7 @@ Read `soul.md` first before making changes. It is the repo's primary collaborati
 - When the user asks you to create a pull request and does not explicitly say otherwise, create it as a draft pull request by default.
 - Always send a normal user-visible response in chat. Never rely on task completion UI alone to communicate that work is done.
 - For conversational questions, answer in normal chat first; do not rely on task completion/status UI as the handoff.
+- Only do what the user explicitly asked for. Do not predict follow-on work, widen scope, or add adjacent changes unless the user asks for them.
 - Do not run Playwright end-to-end tests as part of routine local validation. The pull request pipeline should provide that coverage unless the user explicitly asks for a Playwright run.
 
 ## Build, test, lint, and local workflow
