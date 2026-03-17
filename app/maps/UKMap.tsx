@@ -9,11 +9,11 @@ import {
   type ChangeEvent,
 } from "react";
 import { useFormStatus } from "react-dom";
-import { latLngBounds, type LatLngBoundsExpression } from "leaflet";
+import { Icon, latLngBounds, type LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
-  CircleMarker,
   MapContainer,
+  Marker,
   Popup as LeafletPopup,
   TileLayer,
   useMap,
@@ -38,6 +38,22 @@ const ukAndNorthernIrelandBounds: LatLngBoundsExpression = [
 
 const rainViewerApiUrl = "https://api.rainviewer.com/public/weather-maps.json";
 const rainTilePath = "/256/{z}/{x}/{y}/2/1_1.png";
+const googlePinIcon = new Icon({
+  iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 42">
+      <path
+        fill="#DB4437"
+        stroke="#B3261E"
+        stroke-width="1.5"
+        d="M20 1.5C11.44 1.5 4.5 8.44 4.5 17c0 10.54 11.86 20.89 14.59 23.1.54.44 1.28.44 1.82 0C23.64 37.89 35.5 27.54 35.5 17 35.5 8.44 28.56 1.5 20 1.5Z"
+      />
+      <circle cx="20" cy="17" r="6.5" fill="#fff" />
+    </svg>
+  `)}`,
+  iconSize: [30, 42],
+  iconAnchor: [15, 41],
+  popupAnchor: [0, -36],
+});
 
 const fieldClassName =
   "w-full rounded-2xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition focus:border-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-60";
@@ -121,16 +137,10 @@ function MapResultsLayer({
   return (
     <>
       {results.map((result, index) => (
-        <CircleMarker
+        <Marker
           key={`${result.title}-${result.latitude}-${result.longitude}-${index}`}
-          center={[result.latitude, result.longitude]}
-          pathOptions={{
-            color: "#0369a1",
-            fillColor: "#0ea5e9",
-            fillOpacity: 0.85,
-            weight: 2,
-          }}
-          radius={9}
+          icon={googlePinIcon}
+          position={[result.latitude, result.longitude]}
         >
           <LeafletPopup>
             <div className="space-y-2">
@@ -151,7 +161,7 @@ function MapResultsLayer({
               </a>
             </div>
           </LeafletPopup>
-        </CircleMarker>
+        </Marker>
       ))}
     </>
   );
