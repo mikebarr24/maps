@@ -26,7 +26,7 @@ const searchRequestSchema = z.object({
 
 const mapSearchConfig: AiRequestConfig = {
   provider: AiProvider.OpenAI,
-  model: OpenAIModel.Gpt5Mini,
+  model: OpenAIModel.Gpt54Mini,
   thinking: AiThinkingLevel.Low,
 };
 
@@ -44,12 +44,13 @@ Each result must include:
 - a short description
 - an original URL to a public webpage that supports the recommendation
 
+Coordinates must be very accurate for the specific place, not a rough nearby estimate.
+If you cannot determine accurate coordinates for a place from the websites provided, do not include that place in the results.
+
 If no suitable places can be found, return an empty results array.
 `.trim();
 
-function getFieldErrors(
-  error: z.ZodError,
-): Record<string, string> | undefined {
+function getFieldErrors(error: z.ZodError): Record<string, string> | undefined {
   const flattened = z.flattenError(error).fieldErrors as Record<
     string,
     string[] | undefined
@@ -71,7 +72,8 @@ function buildPrompt(input: {
 }) {
   const sourceUrls =
     input.sourceUrls.length > 0
-      ? input.sourceUrls.map((sourceUrl, index) => `${index + 1}. ${sourceUrl}`)
+      ? input.sourceUrls
+          .map((sourceUrl, index) => `${index + 1}. ${sourceUrl}`)
           .join("\n")
       : "No source URLs were provided for this activity type. Use reliable public sources and include the most relevant URL for each result.";
 
@@ -97,6 +99,8 @@ ${sourceUrls}
 Find real places for this activity in or near the requested location.
 Make the suggestions specific and varied rather than repeating similar venues.
 Use concise descriptions.
+Only include places when you can provide very accurate coordinates for the specific place, not a rough nearby estimate.
+If you cannot be accurate with the coordinates, leave that place out.
 `.trim();
 }
 

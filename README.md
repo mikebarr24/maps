@@ -241,6 +241,8 @@ OpenAI is the only wired provider today. The current OpenAI model allowlist is:
 
 - `gpt-5-mini`
 - `gpt-5`
+- `gpt-5.4-mini`
+- `gpt-5.4-nano`
 
 Thinking levels map to OpenAI reasoning effort:
 

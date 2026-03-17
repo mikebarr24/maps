@@ -73,6 +73,7 @@ export async function generateStructuredOutput<TSchema extends z.ZodTypeAny>({
       system: instructions,
       prompt,
       output: Output.object({ schema }),
+      tools: config.tools,
       providerOptions: buildProviderOptions(config, sessionId),
     });
 
@@ -101,6 +102,7 @@ export async function generatePlainText({
       system: instructions,
       prompt,
       output: Output.text(),
+      tools: config.tools,
       providerOptions: buildProviderOptions(config, sessionId),
     });
 

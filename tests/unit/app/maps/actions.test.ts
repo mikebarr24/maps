@@ -100,6 +100,16 @@ describe("app/maps/actions", () => {
       locationQuery: "Peak District",
     });
     expect(generateStructuredOutputMock).toHaveBeenCalledTimes(1);
+    expect(generateStructuredOutputMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        instructions: expect.stringContaining(
+          "If you cannot determine accurate coordinates for a place from the websites provided, do not include that place in the results.",
+        ),
+        prompt: expect.stringContaining(
+          "If you cannot be accurate with the coordinates, leave that place out.",
+        ),
+      }),
+    );
     expect(loggerErrorMock).toHaveBeenCalledWith({
       eventType: "maps.search.failed",
       source: "maps.actions",
@@ -113,7 +123,7 @@ describe("app/maps/actions", () => {
         hasCustomPrompt: true,
         sourceUrlCount: 2,
         provider: "openai",
-        model: "gpt-5-mini",
+        model: "gpt-5.4-mini",
         thinking: "low",
       },
     });
@@ -155,7 +165,7 @@ describe("app/maps/actions", () => {
           hasCustomPrompt: true,
           sourceUrlCount: 2,
           provider: "openai",
-          model: "gpt-5-mini",
+          model: "gpt-5.4-mini",
           thinking: "low",
         },
       }),
