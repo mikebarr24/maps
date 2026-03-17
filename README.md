@@ -147,6 +147,19 @@ Connection strings:
 
 - Host machine talking to Docker Postgres: `postgres://postgres:postgres@localhost:5433/maps`
 
+## AI-powered admin descriptions
+
+The admin activity form can generate draft descriptions on the server using the
+Vercel AI SDK. To enable that flow locally, add your OpenAI key to `.env.local`:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key
+```
+
+The server-side AI integration is centralized under `app/ai/`, so app features
+can choose a provider, model, and thinking level per request without importing
+provider SDK details directly.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

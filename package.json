@@ -19,6 +19,8 @@
     "playwright:codegen": "playwright codegen http://127.0.0.1:3000"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.41",
+    "ai": "^6.0.116",
     "drizzle-orm": "^0.45.1",
     "leaflet": "^1.9.4",
     "next": "16.1.6",
