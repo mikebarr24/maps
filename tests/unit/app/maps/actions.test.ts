@@ -105,6 +105,27 @@ describe("app/maps/actions", () => {
     expect(generateStructuredOutputMock).toHaveBeenCalledWith(
       expect.objectContaining({
         instructions: expect.stringContaining(
+          "Start with your own general knowledge to identify plausible places for the activity and area.",
+        ),
+        prompt: expect.stringContaining(
+          "Use your own knowledge first to decide on likely places, then use public websites only to verify the coordinates and choose the supporting URL for each result.",
+        ),
+        config: expect.objectContaining({
+          provider: "openai",
+          model: "gpt-5.4-mini",
+          thinking: "low",
+          tools: expect.objectContaining({
+            webSearch: expect.objectContaining({
+              type: "provider",
+              id: "openai.web_search",
+            }),
+          }),
+        }),
+      }),
+    );
+    expect(generateStructuredOutputMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        instructions: expect.stringContaining(
           "If you cannot determine accurate coordinates for a place from the websites provided, do not include that place in the results.",
         ),
         prompt: expect.stringContaining(
