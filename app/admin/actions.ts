@@ -160,6 +160,20 @@ const logAdminActionError = async ({
   }
 };
 
+const logAdminActionSuccess = async (
+  input: Parameters<typeof logger.info>[0],
+) => {
+  try {
+    await logger.info(input);
+  } catch (loggingError) {
+    console.error("[admin.actions] Failed to write info log", {
+      eventType: input.eventType,
+      loggingError,
+      metadata: input.metadata,
+    });
+  }
+};
+
 export async function createActivityTypeAction(
   _prevState: AdminFormState,
   formData: FormData,
@@ -182,31 +196,19 @@ export async function createActivityTypeAction(
     name: parsed.data.name,
     sourceUrls: parsed.data.sourceUrls,
   };
+  let createdActivityType:
+    | {
+        id: number;
+        name: string;
+        sourceUrls: string[];
+      }
+    | undefined;
 
   try {
-    await db.transaction(async (tx) => {
-      const [createdActivityType] = await tx
-        .insert(activityTypes)
-        .values(values)
-        .returning({
-          id: activityTypes.id,
-          name: activityTypes.name,
-          sourceUrls: activityTypes.sourceUrls,
-        });
-
-      await logger.info(
-        {
-          eventType: "activity-type.created",
-          source: "admin.actions",
-          message: "Created activity type from admin",
-          metadata: {
-            activityTypeId: createdActivityType.id,
-            name: createdActivityType.name,
-            sourceUrls: createdActivityType.sourceUrls,
-          },
-        },
-        tx,
-      );
+    [createdActivityType] = await db.insert(activityTypes).values(values).returning({
+      id: activityTypes.id,
+      name: activityTypes.name,
+      sourceUrls: activityTypes.sourceUrls,
     });
   } catch (error) {
     await logAdminActionError({
@@ -217,6 +219,19 @@ export async function createActivityTypeAction(
     });
 
     return getErrorState("Unable to create activity type.", error);
+  }
+
+  if (createdActivityType) {
+    await logAdminActionSuccess({
+      eventType: "activity-type.created",
+      source: "admin.actions",
+      message: "Created activity type from admin",
+      metadata: {
+        activityTypeId: createdActivityType.id,
+        name: createdActivityType.name,
+        sourceUrls: createdActivityType.sourceUrls,
+      },
+    });
   }
 
   revalidatePath("/admin");
@@ -256,37 +271,25 @@ export async function createActivityAction(
     customPrompt: parsed.data.customPrompt || null,
     isPublished: parsed.data.isPublished,
   };
+  let createdActivity:
+    | {
+        id: number;
+        activityTypeId: number;
+        title: string;
+        description: string;
+        customPrompt: string | null;
+        isPublished: boolean;
+      }
+    | undefined;
 
   try {
-    await db.transaction(async (tx) => {
-      const [createdActivity] = await tx
-        .insert(activities)
-        .values(values)
-        .returning({
-          id: activities.id,
-          activityTypeId: activities.activityTypeId,
-          title: activities.title,
-          description: activities.description,
-          customPrompt: activities.customPrompt,
-          isPublished: activities.isPublished,
-        });
-
-      await logger.info(
-        {
-          eventType: "activity.created",
-          source: "admin.actions",
-          message: "Created activity from admin",
-          metadata: {
-            activityId: createdActivity.id,
-            activityTypeId: createdActivity.activityTypeId,
-            title: createdActivity.title,
-            description: createdActivity.description,
-            customPrompt: createdActivity.customPrompt,
-            isPublished: createdActivity.isPublished,
-          },
-        },
-        tx,
-      );
+    [createdActivity] = await db.insert(activities).values(values).returning({
+      id: activities.id,
+      activityTypeId: activities.activityTypeId,
+      title: activities.title,
+      description: activities.description,
+      customPrompt: activities.customPrompt,
+      isPublished: activities.isPublished,
     });
   } catch (error) {
     await logAdminActionError({
@@ -297,6 +300,22 @@ export async function createActivityAction(
     });
 
     return getErrorState("Unable to create activity.", error);
+  }
+
+  if (createdActivity) {
+    await logAdminActionSuccess({
+      eventType: "activity.created",
+      source: "admin.actions",
+      message: "Created activity from admin",
+      metadata: {
+        activityId: createdActivity.id,
+        activityTypeId: createdActivity.activityTypeId,
+        title: createdActivity.title,
+        description: createdActivity.description,
+        customPrompt: createdActivity.customPrompt,
+        isPublished: createdActivity.isPublished,
+      },
+    });
   }
 
   revalidatePath("/admin");
@@ -337,37 +356,24 @@ export async function updateActivityTypeAction(
     sourceUrls: parsedFields.data.sourceUrls,
     updatedAt: new Date(),
   };
+  let updatedActivityType:
+    | {
+        id: number;
+        name: string;
+        sourceUrls: string[];
+      }
+    | undefined;
 
   try {
-    await db.transaction(async (tx) => {
-      const [updatedActivityType] = await tx
-        .update(activityTypes)
-        .set(values)
-        .where(eq(activityTypes.id, parsedId.data.id))
-        .returning({
-          id: activityTypes.id,
-          name: activityTypes.name,
-          sourceUrls: activityTypes.sourceUrls,
-        });
-
-      if (!updatedActivityType) {
-        return;
-      }
-
-      await logger.info(
-        {
-          eventType: "activity-type.updated",
-          source: "admin.actions",
-          message: "Updated activity type from admin",
-          metadata: {
-            activityTypeId: updatedActivityType.id,
-            name: updatedActivityType.name,
-            sourceUrls: updatedActivityType.sourceUrls,
-          },
-        },
-        tx,
-      );
-    });
+    [updatedActivityType] = await db
+      .update(activityTypes)
+      .set(values)
+      .where(eq(activityTypes.id, parsedId.data.id))
+      .returning({
+        id: activityTypes.id,
+        name: activityTypes.name,
+        sourceUrls: activityTypes.sourceUrls,
+      });
   } catch (error) {
     await logAdminActionError({
       eventType: "activity-type.update.failed",
@@ -380,6 +386,19 @@ export async function updateActivityTypeAction(
     });
 
     return getErrorState("Unable to update activity type.", error);
+  }
+
+  if (updatedActivityType) {
+    await logAdminActionSuccess({
+      eventType: "activity-type.updated",
+      source: "admin.actions",
+      message: "Updated activity type from admin",
+      metadata: {
+        activityTypeId: updatedActivityType.id,
+        name: updatedActivityType.name,
+        sourceUrls: updatedActivityType.sourceUrls,
+      },
+    });
   }
 
   revalidatePath("/admin");
@@ -406,36 +425,23 @@ export async function deleteActivityTypeAction(
       submittedAt: Date.now(),
     };
   }
+  let deletedActivityType:
+    | {
+        id: number;
+        name: string;
+        sourceUrls: string[];
+      }
+    | undefined;
 
   try {
-    await db.transaction(async (tx) => {
-      const [deletedActivityType] = await tx
-        .delete(activityTypes)
-        .where(eq(activityTypes.id, parsed.data.id))
-        .returning({
-          id: activityTypes.id,
-          name: activityTypes.name,
-          sourceUrls: activityTypes.sourceUrls,
-        });
-
-      if (!deletedActivityType) {
-        return;
-      }
-
-      await logger.info(
-        {
-          eventType: "activity-type.deleted",
-          source: "admin.actions",
-          message: "Deleted activity type from admin",
-          metadata: {
-            activityTypeId: deletedActivityType.id,
-            name: deletedActivityType.name,
-            sourceUrls: deletedActivityType.sourceUrls,
-          },
-        },
-        tx,
-      );
-    });
+    [deletedActivityType] = await db
+      .delete(activityTypes)
+      .where(eq(activityTypes.id, parsed.data.id))
+      .returning({
+        id: activityTypes.id,
+        name: activityTypes.name,
+        sourceUrls: activityTypes.sourceUrls,
+      });
   } catch (error) {
     await logAdminActionError({
       eventType: "activity-type.delete.failed",
@@ -447,6 +453,19 @@ export async function deleteActivityTypeAction(
     });
 
     return getErrorState("Unable to delete activity type.", error);
+  }
+
+  if (deletedActivityType) {
+    await logAdminActionSuccess({
+      eventType: "activity-type.deleted",
+      source: "admin.actions",
+      message: "Deleted activity type from admin",
+      metadata: {
+        activityTypeId: deletedActivityType.id,
+        name: deletedActivityType.name,
+        sourceUrls: deletedActivityType.sourceUrls,
+      },
+    });
   }
 
   revalidatePath("/admin");
@@ -493,43 +512,30 @@ export async function updateActivityAction(
     isPublished: parsedFields.data.isPublished,
     updatedAt: new Date(),
   };
+  let updatedActivity:
+    | {
+        id: number;
+        activityTypeId: number;
+        title: string;
+        description: string;
+        customPrompt: string | null;
+        isPublished: boolean;
+      }
+    | undefined;
 
   try {
-    await db.transaction(async (tx) => {
-      const [updatedActivity] = await tx
-        .update(activities)
-        .set(values)
-        .where(eq(activities.id, parsedId.data.id))
-        .returning({
-          id: activities.id,
-          activityTypeId: activities.activityTypeId,
-          title: activities.title,
-          description: activities.description,
-          customPrompt: activities.customPrompt,
-          isPublished: activities.isPublished,
-        });
-
-      if (!updatedActivity) {
-        return;
-      }
-
-      await logger.info(
-        {
-          eventType: "activity.updated",
-          source: "admin.actions",
-          message: "Updated activity from admin",
-          metadata: {
-            activityId: updatedActivity.id,
-            activityTypeId: updatedActivity.activityTypeId,
-            title: updatedActivity.title,
-            description: updatedActivity.description,
-            customPrompt: updatedActivity.customPrompt,
-            isPublished: updatedActivity.isPublished,
-          },
-        },
-        tx,
-      );
-    });
+    [updatedActivity] = await db
+      .update(activities)
+      .set(values)
+      .where(eq(activities.id, parsedId.data.id))
+      .returning({
+        id: activities.id,
+        activityTypeId: activities.activityTypeId,
+        title: activities.title,
+        description: activities.description,
+        customPrompt: activities.customPrompt,
+        isPublished: activities.isPublished,
+      });
   } catch (error) {
     await logAdminActionError({
       eventType: "activity.update.failed",
@@ -542,6 +548,22 @@ export async function updateActivityAction(
     });
 
     return getErrorState("Unable to update activity.", error);
+  }
+
+  if (updatedActivity) {
+    await logAdminActionSuccess({
+      eventType: "activity.updated",
+      source: "admin.actions",
+      message: "Updated activity from admin",
+      metadata: {
+        activityId: updatedActivity.id,
+        activityTypeId: updatedActivity.activityTypeId,
+        title: updatedActivity.title,
+        description: updatedActivity.description,
+        customPrompt: updatedActivity.customPrompt,
+        isPublished: updatedActivity.isPublished,
+      },
+    });
   }
 
   revalidatePath("/admin");
@@ -568,42 +590,29 @@ export async function deleteActivityAction(
       submittedAt: Date.now(),
     };
   }
+  let deletedActivity:
+    | {
+        id: number;
+        activityTypeId: number;
+        title: string;
+        description: string;
+        customPrompt: string | null;
+        isPublished: boolean;
+      }
+    | undefined;
 
   try {
-    await db.transaction(async (tx) => {
-      const [deletedActivity] = await tx
-        .delete(activities)
-        .where(eq(activities.id, parsed.data.id))
-        .returning({
-          id: activities.id,
-          activityTypeId: activities.activityTypeId,
-          title: activities.title,
-          description: activities.description,
-          customPrompt: activities.customPrompt,
-          isPublished: activities.isPublished,
-        });
-
-      if (!deletedActivity) {
-        return;
-      }
-
-      await logger.info(
-        {
-          eventType: "activity.deleted",
-          source: "admin.actions",
-          message: "Deleted activity from admin",
-          metadata: {
-            activityId: deletedActivity.id,
-            activityTypeId: deletedActivity.activityTypeId,
-            title: deletedActivity.title,
-            description: deletedActivity.description,
-            customPrompt: deletedActivity.customPrompt,
-            isPublished: deletedActivity.isPublished,
-          },
-        },
-        tx,
-      );
-    });
+    [deletedActivity] = await db
+      .delete(activities)
+      .where(eq(activities.id, parsed.data.id))
+      .returning({
+        id: activities.id,
+        activityTypeId: activities.activityTypeId,
+        title: activities.title,
+        description: activities.description,
+        customPrompt: activities.customPrompt,
+        isPublished: activities.isPublished,
+      });
   } catch (error) {
     await logAdminActionError({
       eventType: "activity.delete.failed",
@@ -615,6 +624,22 @@ export async function deleteActivityAction(
     });
 
     return getErrorState("Unable to delete activity.", error);
+  }
+
+  if (deletedActivity) {
+    await logAdminActionSuccess({
+      eventType: "activity.deleted",
+      source: "admin.actions",
+      message: "Deleted activity from admin",
+      metadata: {
+        activityId: deletedActivity.id,
+        activityTypeId: deletedActivity.activityTypeId,
+        title: deletedActivity.title,
+        description: deletedActivity.description,
+        customPrompt: deletedActivity.customPrompt,
+        isPublished: deletedActivity.isPublished,
+      },
+    });
   }
 
   revalidatePath("/admin");
