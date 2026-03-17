@@ -11,6 +11,11 @@ export type MapActivityType = {
   activities: MapActivity[];
 };
 
+export type MapViewProps = {
+  activityTypes: MapActivityType[];
+  isSchemaReady: boolean;
+};
+
 export type MapPlaceResult = {
   title: string;
   latitude: number;

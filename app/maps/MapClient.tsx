@@ -1,15 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { MapActivityType } from "./types";
+import type { MapViewProps } from "./types";
 
 const UKMap = dynamic(() => import("./UKMap"), { ssr: false });
 
-type MapClientProps = {
-  activityTypes: MapActivityType[];
-  isSchemaReady: boolean;
-};
-
-export default function MapClient(props: MapClientProps) {
+export default function MapClient(props: MapViewProps) {
   return <UKMap {...props} />;
 }

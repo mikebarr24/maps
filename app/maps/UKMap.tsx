@@ -25,9 +25,9 @@ import FormFieldError from "@/app/components/FormFieldError";
 import Popup from "@/app/components/Popup";
 import { searchActivitiesAction } from "./actions";
 import type {
-  MapActivityType,
   MapPlaceResult,
   MapSearchFormState,
+  MapViewProps,
 } from "./types";
 import { initialMapSearchState } from "./types";
 
@@ -49,11 +49,6 @@ type RainViewerResponse = {
       path?: string;
     }>;
   };
-};
-
-type UKMapProps = {
-  activityTypes: MapActivityType[];
-  isSchemaReady: boolean;
 };
 
 const joinClasses = (...classes: Array<string | false | null | undefined>) =>
@@ -165,7 +160,7 @@ function MapResultsLayer({
 export default function UKMap({
   activityTypes,
   isSchemaReady,
-}: UKMapProps) {
+}: MapViewProps) {
   const [showRain, setShowRain] = useState(false);
   const [rainTileUrl, setRainTileUrl] = useState<string | null>(null);
   const [isRainLoading, setIsRainLoading] = useState(false);
