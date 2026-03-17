@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { db } from "./index";
+import { db, type Db } from "./index";
 import {
   eventLogs,
   type EventLogLevel,
@@ -43,6 +43,8 @@ type NormalizedErrorDetails = {
   stack?: string;
 };
 
+type LogWriter = Pick<Db, "insert">;
+
 const normalizeError = (error: unknown): NormalizedErrorDetails => {
   if (error instanceof Error) {
     const code =
@@ -69,10 +71,13 @@ const normalizeError = (error: unknown): NormalizedErrorDetails => {
   };
 };
 
-const insertLog = async (input: z.input<typeof logEventSchema>) => {
+const insertLog = async (
+  input: z.input<typeof logEventSchema>,
+  writer: LogWriter = db,
+) => {
   const entry = logEventSchema.parse(input);
 
-  await db.insert(eventLogs).values({
+  await writer.insert(eventLogs).values({
     level: entry.level,
     eventType: entry.eventType,
     source: entry.source ?? null,
@@ -86,7 +91,7 @@ const insertLog = async (input: z.input<typeof logEventSchema>) => {
   });
 };
 
-export async function logEvent(input: LogEventInput) {
+export async function logEvent(input: LogEventInput, writer?: LogWriter) {
   await insertLog({
     level: input.level ?? "info",
     eventType: input.eventType,
@@ -95,10 +100,10 @@ export async function logEvent(input: LogEventInput) {
     metadata: input.metadata,
     requestId: input.requestId,
     sessionId: input.sessionId,
-  });
+  }, writer);
 }
 
-export async function logError(input: LogErrorInput) {
+export async function logError(input: LogErrorInput, writer?: LogWriter) {
   const normalizedError = normalizeError(input.error);
 
   await insertLog({
@@ -112,16 +117,16 @@ export async function logError(input: LogErrorInput) {
     errorName: normalizedError.name,
     errorCode: normalizedError.code,
     errorStack: normalizedError.stack,
-  });
+  }, writer);
 }
 
 export const logger = {
   log: logEvent,
-  debug: (input: Omit<LogEventInput, "level">) =>
-    logEvent({ ...input, level: "debug" }),
-  info: (input: Omit<LogEventInput, "level">) =>
-    logEvent({ ...input, level: "info" }),
-  warn: (input: Omit<LogEventInput, "level">) =>
-    logEvent({ ...input, level: "warn" }),
+  debug: (input: Omit<LogEventInput, "level">, writer?: LogWriter) =>
+    logEvent({ ...input, level: "debug" }, writer),
+  info: (input: Omit<LogEventInput, "level">, writer?: LogWriter) =>
+    logEvent({ ...input, level: "info" }, writer),
+  warn: (input: Omit<LogEventInput, "level">, writer?: LogWriter) =>
+    logEvent({ ...input, level: "warn" }, writer),
   error: logError,
 };
