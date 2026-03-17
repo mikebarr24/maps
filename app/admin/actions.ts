@@ -3,8 +3,6 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { AiProvider } from "@/app/ai/contracts";
-import { generateStructuredOutput } from "@/app/ai/service";
 import { db } from "@/db";
 import { activities, activityTypes } from "@/db/schema";
 
@@ -12,7 +10,6 @@ export type AdminFormState = {
   status: "idle" | "success" | "error";
   message?: string;
   fieldErrors?: Record<string, string>;
-  generatedDescription?: string;
   submittedAt?: number;
 };
 
@@ -83,31 +80,6 @@ const activitySchema = z.object({
   isPublished: z.boolean(),
 });
 
-const generateActivityDescriptionSchema = z.object({
-  activityTypeId: z
-    .coerce.number()
-    .int()
-    .positive("Choose an activity type before generating a description."),
-  title: z
-    .string()
-    .trim()
-    .min(1, "Enter an activity title before generating a description.")
-    .max(160, "Title must be 160 characters or fewer."),
-  customPrompt: z
-    .string()
-    .trim()
-    .max(4000, "Custom prompt must be 4000 characters or fewer.")
-    .optional(),
-});
-
-const generatedActivityDescriptionSchema = z.object({
-  description: z
-    .string()
-    .trim()
-    .min(1, "Description is required.")
-    .max(4000, "Description must be 4000 characters or fewer."),
-});
-
 const idSchema = z.object({
   id: z.coerce.number().int().positive("A valid record id is required."),
 });
@@ -158,9 +130,6 @@ const getErrorState = (
     submittedAt: Date.now(),
   };
 };
-
-const getErrorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : "An unexpected error occurred.";
 
 export async function createActivityTypeAction(
   _prevState: AdminFormState,
@@ -238,82 +207,6 @@ export async function createActivityAction(
     message: "Activity created.",
     submittedAt: Date.now(),
   };
-}
-
-export async function generateActivityDescriptionAction(
-  _prevState: AdminFormState,
-  formData: FormData,
-): Promise<AdminFormState> {
-  const parsed = generateActivityDescriptionSchema.safeParse({
-    activityTypeId: formData.get("activityTypeId"),
-    title: formData.get("title"),
-    customPrompt: formData.get("customPrompt") || undefined,
-  });
-
-  if (!parsed.success) {
-    return {
-      status: "error",
-      message: "Add an activity type and title before generating a description.",
-      fieldErrors: getFieldErrors(parsed.error),
-      submittedAt: Date.now(),
-    };
-  }
-
-  const [activityTypeRecord] = await db
-    .select({
-      id: activityTypes.id,
-      name: activityTypes.name,
-      sourceUrls: activityTypes.sourceUrls,
-    })
-    .from(activityTypes)
-    .where(eq(activityTypes.id, parsed.data.activityTypeId))
-    .limit(1);
-
-  if (!activityTypeRecord) {
-    return {
-      status: "error",
-      message: "Choose a valid activity type before generating a description.",
-      submittedAt: Date.now(),
-    };
-  }
-
-  const sourceUrls =
-    activityTypeRecord.sourceUrls.length > 0
-      ? activityTypeRecord.sourceUrls.map((sourceUrl) => `- ${sourceUrl}`).join("\n")
-      : "No source URLs were provided.";
-
-  try {
-    const { description } = await generateStructuredOutput({
-      instructions:
-        "You write concise admin-ready descriptions for outdoor activity filters. Return JSON only. Write one or two plain-text sentences with no markdown. Use the activity type, source URLs, and custom prompt as context. Do not invent specific claims from source URLs that are not clearly implied.",
-      prompt: [
-        `Activity type: ${activityTypeRecord.name}`,
-        `Activity title: ${parsed.data.title}`,
-        `Custom prompt: ${parsed.data.customPrompt ?? "None provided."}`,
-        "Source URLs:",
-        sourceUrls,
-      ].join("\n"),
-      schema: generatedActivityDescriptionSchema,
-      config: {
-        provider: AiProvider.OpenAI,
-        model: "gpt-5-mini",
-        thinking: "minimal",
-      },
-    });
-
-    return {
-      status: "success",
-      message: "Description generated. Review it before saving the activity.",
-      generatedDescription: description,
-      submittedAt: Date.now(),
-    };
-  } catch (error) {
-    return {
-      status: "error",
-      message: `Unable to generate a description. ${getErrorMessage(error)}`,
-      submittedAt: Date.now(),
-    };
-  }
 }
 
 export async function updateActivityTypeAction(

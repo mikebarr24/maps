@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useActionState, useEffect, useRef } from "react";
-import { FiLayers, FiPlusCircle, FiZap } from "react-icons/fi";
+import { FiLayers, FiPlusCircle } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -16,7 +16,6 @@ import {
 } from "./AdminPortal";
 import {
   createActivityAction,
-  generateActivityDescriptionAction,
   createActivityTypeAction,
   type AdminFormState,
 } from "./actions";
@@ -47,29 +46,6 @@ function SubmitButton({
   return (
     <Button type="submit" disabled={disabled || pending}>
       {pending ? "Saving..." : children}
-    </Button>
-  );
-}
-
-function GenerateDescriptionButton({
-  action,
-  disabled = false,
-}: {
-  action: (payload: FormData) => void;
-  disabled?: boolean;
-}) {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button
-      type="submit"
-      formAction={action}
-      formNoValidate
-      variant="secondary"
-      disabled={disabled || pending}
-    >
-      <FiZap size={16} />
-      {pending ? "Generating..." : "Generate with AI"}
     </Button>
   );
 }
@@ -177,13 +153,8 @@ export function ActivityFormCard({
 }: AdminFormsProps) {
   const router = useRouter();
   const activityFormRef = useRef<HTMLFormElement | null>(null);
-  const descriptionFieldRef = useRef<HTMLTextAreaElement | null>(null);
   const [activityState, createActivity] = useActionState(
     createActivityAction,
-    initialState,
-  );
-  const [generationState, generateActivityDescription] = useActionState(
-    generateActivityDescriptionAction,
     initialState,
   );
 
@@ -207,31 +178,6 @@ export function ActivityFormCard({
     activityState.status,
     activityState.submittedAt,
     router,
-  ]);
-
-  useEffect(() => {
-    if (generationState.status === "idle" || !generationState.message) {
-      return;
-    }
-
-    const notify =
-      generationState.status === "success" ? toast.success : toast.error;
-    notify(generationState.message, {
-      id: generationState.submittedAt,
-    });
-
-    if (
-      generationState.status === "success" &&
-      generationState.generatedDescription &&
-      descriptionFieldRef.current
-    ) {
-      descriptionFieldRef.current.value = generationState.generatedDescription;
-    }
-  }, [
-    generationState.generatedDescription,
-    generationState.message,
-    generationState.status,
-    generationState.submittedAt,
   ]);
 
   const isActivityFormDisabled = !isSchemaReady || activityTypes.length === 0;
@@ -279,10 +225,7 @@ export function ActivityFormCard({
                 ))}
               </select>
               <FormFieldError
-                message={
-                  activityState.fieldErrors?.activityTypeId ??
-                  generationState.fieldErrors?.activityTypeId
-                }
+                message={activityState.fieldErrors?.activityTypeId}
               />
             </label>
 
@@ -297,19 +240,13 @@ export function ActivityFormCard({
                 className={settingsFieldClassName}
                 placeholder="Enter an activity name"
               />
-              <FormFieldError
-                message={
-                  activityState.fieldErrors?.title ??
-                  generationState.fieldErrors?.title
-                }
-              />
+              <FormFieldError message={activityState.fieldErrors?.title} />
             </label>
           </div>
 
           <label className="flex flex-col gap-2">
             <span className="text-sm font-medium">Description</span>
             <textarea
-              ref={descriptionFieldRef}
               name="description"
               required
               rows={5}
@@ -319,10 +256,6 @@ export function ActivityFormCard({
               placeholder="Describe how this activity should appear in the map filters."
             />
             <FormFieldError message={activityState.fieldErrors?.description} />
-            <p className="m-0 text-sm text-muted-foreground">
-              Generate a draft from the activity type, saved source URLs, and any
-              custom prompt, then review it before saving.
-            </p>
           </label>
 
           <label className="flex flex-col gap-2">
@@ -335,12 +268,7 @@ export function ActivityFormCard({
               className={settingsTextareaClassName}
               placeholder="Add optional LLM instructions, or leave this blank."
             />
-            <FormFieldError
-              message={
-                activityState.fieldErrors?.customPrompt ??
-                generationState.fieldErrors?.customPrompt
-              }
-            />
+            <FormFieldError message={activityState.fieldErrors?.customPrompt} />
           </label>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -355,11 +283,7 @@ export function ActivityFormCard({
               Published
             </label>
 
-            <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
-              <GenerateDescriptionButton
-                action={generateActivityDescription}
-                disabled={isActivityFormDisabled}
-              />
+            <div className="flex justify-start sm:justify-end">
               <SubmitButton disabled={isActivityFormDisabled}>
                 Create activity
               </SubmitButton>
