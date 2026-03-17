@@ -626,7 +626,7 @@ export default function UKMap({
                               <a
                                 className="shrink-0 text-sm font-medium text-sky-700 underline"
                                 href={result.originalUrl}
-                                rel="noreferrer"
+                                rel="noopener noreferrer"
                                 target="_blank"
                               >
                                 Source
