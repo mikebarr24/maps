@@ -15,6 +15,13 @@
       "when": 1773608427838,
       "tag": "0001_slippery_randall_flagg",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773757167912,
+      "tag": "0002_talented_nehzno",
+      "breakpoints": true
     }
   ]
 }

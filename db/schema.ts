@@ -3,6 +3,7 @@ import {
   boolean,
   integer,
   index,
+  jsonb,
   pgTable,
   serial,
   text,
@@ -56,6 +57,34 @@ export const activities = pgTable(
       table.activityTypeId,
       table.title,
     ),
+  ],
+);
+
+export type EventLogLevel = "debug" | "info" | "warn" | "error";
+export type EventLogMetadata = Record<string, unknown>;
+
+export const eventLogs = pgTable(
+  "event_logs",
+  {
+    id: serial("id").primaryKey(),
+    level: varchar("level", { length: 16 }).notNull(),
+    eventType: varchar("event_type", { length: 120 }).notNull(),
+    source: varchar("source", { length: 120 }),
+    message: text("message").notNull(),
+    metadata: jsonb("metadata").$type<EventLogMetadata>(),
+    errorName: varchar("error_name", { length: 160 }),
+    errorCode: varchar("error_code", { length: 80 }),
+    errorStack: text("error_stack"),
+    requestId: varchar("request_id", { length: 120 }),
+    sessionId: varchar("session_id", { length: 120 }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("event_logs_level_idx").on(table.level),
+    index("event_logs_event_type_idx").on(table.eventType),
+    index("event_logs_created_at_idx").on(table.createdAt),
   ],
 );
 
