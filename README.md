@@ -63,6 +63,14 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) when the server is ready.
 
+### VS Code debugging
+
+This repo includes a workspace launch profile in `.vscode/launch.json`.
+
+In VS Code, open the **Run and Debug** view and start `Debug Next.js app`.
+
+That profile runs `npm run dev -- --hostname 127.0.0.1 --port 3000`, waits for the app to report its local URL, and then opens a Chrome debugging session against the running app. Keep `.env.local` configured with `DATABASE_URL` so the app can boot normally.
+
 ## Local Postgres and Drizzle
 
 If you want to manage the database container yourself instead of relying on `npm run dev`, use Docker Compose directly:
