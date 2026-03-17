@@ -1,16 +1,10 @@
 import "server-only";
 
 import { createProviderRegistry } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createOpenAI, openai as defaultOpenAIProvider } from "@ai-sdk/openai";
 import { z } from "zod";
-import type { AiThinkingLevel } from "../contracts";
-
-enum OpenAIModel {
-  Gpt5Mini = "gpt-5-mini",
-  Gpt5 = "gpt-5",
-}
-
-const supportedOpenAIModels = Object.values(OpenAIModel);
+import { AiThinkingLevel } from "../contracts";
+import { OpenAIModel, supportedOpenAIModels } from "./openai-models";
 
 const openAIEnvSchema = z.object({
   OPENAI_API_KEY: z.preprocess(
@@ -21,10 +15,6 @@ const openAIEnvSchema = z.object({
       .min(1, "OPENAI_API_KEY is required to use the OpenAI provider."),
   ),
 });
-
-let openAIProviderRegistry:
-  | ReturnType<typeof createProviderRegistry>
-  | undefined;
 
 function getOpenAIEnv() {
   const parsed = openAIEnvSchema.safeParse({
@@ -41,6 +31,10 @@ function getOpenAIEnv() {
   return parsed.data;
 }
 
+let openAIProviderRegistry:
+  | ReturnType<typeof createProviderRegistry>
+  | undefined;
+
 function getOpenAIProviderRegistry() {
   if (!openAIProviderRegistry) {
     openAIProviderRegistry = createProviderRegistry({
@@ -53,18 +47,17 @@ function getOpenAIProviderRegistry() {
   return openAIProviderRegistry;
 }
 
-function isSupportedOpenAIModel(
-  model: string,
-): model is OpenAIModel {
+function isSupportedOpenAIModel(model: string): model is OpenAIModel {
   return supportedOpenAIModels.includes(model as OpenAIModel);
 }
 
 function mapThinkingToOpenAIReasoningEffort(thinking: AiThinkingLevel) {
   return {
-    minimal: "minimal",
-    low: "low",
-    medium: "medium",
-    high: "high",
+    [AiThinkingLevel.None]: "none",
+    [AiThinkingLevel.Minimal]: "minimal",
+    [AiThinkingLevel.Low]: "low",
+    [AiThinkingLevel.Medium]: "medium",
+    [AiThinkingLevel.High]: "high",
   }[thinking];
 }
 
@@ -88,4 +81,8 @@ export function buildOpenAIProviderOptions(
       user: sessionId,
     },
   };
+}
+
+export function createOpenAIWebSearchTool() {
+  return defaultOpenAIProvider.tools.webSearch();
 }

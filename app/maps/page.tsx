@@ -1,13 +1,14 @@
-"use client";
+import { loadMapsData } from "./data";
+import MapClient from "./MapClient";
 
-import dynamic from "next/dynamic";
+export const dynamic = "force-dynamic";
 
-const UKMap = dynamic(() => import("./UKMap"), { ssr: false });
+export default async function MapsPage() {
+  const { activityTypes, isSchemaReady } = await loadMapsData();
 
-export default function MapsPage() {
   return (
     <main className="flex min-h-0 w-full flex-1 overflow-hidden">
-      <UKMap />
+      <MapClient activityTypes={activityTypes} isSchemaReady={isSchemaReady} />
     </main>
   );
 }
