@@ -1,17 +1,12 @@
 import "server-only";
 
-import { createProviderRegistry, generateText, Output } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { generateText, Output } from "ai";
 import { z } from "zod";
 import {
-  AiProvider,
-  type AiThinkingLevel,
   type AiRequestConfig,
   aiRequestConfigSchema,
 } from "./contracts";
-import { getOpenAiEnv } from "./env";
-
-const supportedOpenAiModels = ["gpt-5-mini", "gpt-5"] as const;
+import { buildProviderOptions, resolveLanguageModel } from "./providers";
 
 const structuredRequestSchema = z.object({
   instructions: z.string().trim().min(1, "AI instructions are required."),
@@ -45,69 +40,6 @@ type PlainTextRequest = {
   config: AiRequestConfig;
   sessionId?: string;
 };
-
-let providerRegistry: ReturnType<typeof createProviderRegistry> | undefined;
-
-function getProviderRegistry() {
-  if (!providerRegistry) {
-    providerRegistry = createProviderRegistry({
-      openai: createOpenAI({
-        apiKey: getOpenAiEnv().OPENAI_API_KEY,
-      }),
-    });
-  }
-
-  return providerRegistry;
-}
-
-function mapThinkingToOpenAiReasoningEffort(
-  thinking: AiThinkingLevel,
-) {
-  return {
-    minimal: "minimal",
-    low: "low",
-    medium: "medium",
-    high: "high",
-  }[thinking];
-}
-
-function resolveLanguageModel(config: AiRequestConfig) {
-  switch (config.provider) {
-    case AiProvider.OpenAI: {
-      if (!supportedOpenAiModels.includes(config.model as (typeof supportedOpenAiModels)[number])) {
-        throw new Error(
-          `Unsupported model "${config.model}" for provider "${config.provider}". Supported models: ${supportedOpenAiModels.join(", ")}.`,
-        );
-      }
-
-      return getProviderRegistry().languageModel(`openai:${config.model}`);
-    }
-    case AiProvider.Anthropic:
-      throw new Error(
-        `Provider "${config.provider}" is not configured yet.`,
-      );
-    default:
-      throw new Error(`Unsupported AI provider "${config.provider}".`);
-  }
-}
-
-function buildProviderOptions(config: AiRequestConfig, sessionId?: string) {
-  switch (config.provider) {
-    case AiProvider.OpenAI:
-      return {
-        openai: {
-          reasoningEffort: mapThinkingToOpenAiReasoningEffort(config.thinking),
-          user: sessionId,
-        },
-      };
-    case AiProvider.Anthropic:
-      throw new Error(
-        `Provider "${config.provider}" is not configured yet.`,
-      );
-    default:
-      throw new Error(`Unsupported AI provider "${config.provider}".`);
-  }
-}
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown AI service error.";
