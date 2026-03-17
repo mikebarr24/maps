@@ -7,12 +7,15 @@ Use this document alongside `.github/copilot-instructions.md` when working on th
 - Keep the AI layer provider-agnostic at the service boundary under `app/ai/`.
 - `app/ai/contracts.ts` defines the shared request contract:
   - `AiProvider` is an enum.
-  - `AiRequestConfig` includes `provider`, `model`, and `thinking`.
+  - `AiRequestConfig` includes `provider`, `model`, `thinking`, and optional `tools`.
   - `thinking` supports `none`, `minimal`, `low`, `medium`, and `high`.
+  - `tools` must be a Vercel AI SDK `ToolSet`.
+  - Accepted tool entries are either executable SDK tools with `inputSchema` plus `execute`, or provider-backed tools with `type: "provider"`, a string `id`, and `inputSchema`.
 - `app/ai/service.ts` is the entry point for callers:
   - Use `generateStructuredOutput` for schema-validated object responses.
   - Use `generatePlainText` for plain text responses.
   - Both methods accept `instructions`, `prompt`, `config`, and optional `sessionId`.
+  - Both methods pass `config.tools` through to the underlying AI SDK request when tools are supplied.
 - Keep provider-specific SDK setup and option mapping under `app/ai/providers/`.
 
 ## Provider wiring
@@ -23,6 +26,7 @@ Use this document alongside `.github/copilot-instructions.md` when working on th
   - supported model checks
   - reasoning effort mapping
   - provider options for OpenAI requests
+  - provider-backed tool factories such as `createOpenAIWebSearchTool()`
 - `app/ai/providers/index.ts` is the switchboard that resolves the active language model and provider options from `AiRequestConfig`.
 - `Anthropic` exists in the provider enum but is intentionally not configured yet. Preserve the explicit error for unconfigured providers instead of adding silent fallbacks.
 
@@ -42,6 +46,7 @@ Use this document alongside `.github/copilot-instructions.md` when working on th
   - `medium` -> `medium`
   - `high` -> `high`
 - Pass `sessionId` through to provider options as the OpenAI `user` value when present.
+- The current provider-backed tool example is OpenAI web search, created with `createOpenAIWebSearchTool()` and attached to `AiRequestConfig.tools` under a caller-chosen key such as `webSearch`.
 
 ## Validation and error handling
 
