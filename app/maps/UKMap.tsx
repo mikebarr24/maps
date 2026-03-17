@@ -568,8 +568,11 @@ export default function UKMap({
                                 {activityType.name}
                               </h4>
                               <p className="m-0 mt-1 text-sm text-muted-foreground">
-                                {activityType.activities.length} activit
-                                {activityType.activities.length === 1 ? "y" : "ies"}
+                                {`${activityType.activities.length} ${
+                                  activityType.activities.length === 1
+                                    ? "activity"
+                                    : "activities"
+                                }`}
                               </p>
                             </div>
                             <FiMapPin
