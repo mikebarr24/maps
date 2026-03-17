@@ -8,9 +8,10 @@ import Button from "./Button";
 export type PopupProps = {
   children: ReactNode;
   onClose: () => void;
+  title?: ReactNode;
 };
 
-export default function Popup({ children, onClose }: PopupProps) {
+export default function Popup({ children, onClose, title }: PopupProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const portalTarget = typeof document === "undefined" ? null : document.body;
 
@@ -53,7 +54,7 @@ export default function Popup({ children, onClose }: PopupProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-0"
       role="dialog"
       aria-modal="true"
     >
@@ -65,18 +66,25 @@ export default function Popup({ children, onClose }: PopupProps) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 pt-16 shadow-lg focus:outline-none"
+        className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-lg focus:outline-none"
       >
-        <Button
-          aria-label="Close popup"
-          className="absolute right-4 top-4 shadow-sm"
-          onClick={onClose}
-          size="icon"
-          variant="secondary"
+        <div
+          className={`flex items-start gap-4 ${
+            title ? "justify-between" : "justify-end"
+          }`}
         >
-          <FiX aria-hidden="true" size={18} />
-        </Button>
-        {children}
+          {title ? <div className="min-w-0 flex-1">{title}</div> : null}
+          <Button
+            aria-label="Close popup"
+            className="shrink-0 shadow-sm"
+            onClick={onClose}
+            size="icon"
+            variant="secondary"
+          >
+            <FiX aria-hidden="true" size={18} />
+          </Button>
+        </div>
+        <div className={title ? "mt-3" : undefined}>{children}</div>
       </div>
     </div>,
     portalTarget,
