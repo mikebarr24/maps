@@ -2,6 +2,13 @@
 
 Read `soul.md` first before making changes. It is the repo's primary collaboration guide, and this file captures the repository-specific engineering workflow that should travel with the codebase.
 
+## Working agreements
+
+- When the user asks you to create a pull request and does not explicitly say otherwise, create it as a draft pull request by default.
+- Always send a normal user-visible response in chat. Never rely on task completion UI alone to communicate that work is done.
+- For conversational questions, answer in normal chat first; do not rely on task completion/status UI as the handoff.
+- Do not run Playwright end-to-end tests as part of routine local validation. The pull request pipeline should provide that coverage unless the user explicitly asks for a Playwright run.
+
 ## Build, test, lint, and local workflow
 
 - `npm run dev` starts Next.js and, via `predev`, runs `scripts/ensure-dev-db.mjs` to bring up the `maps-postgres` Docker service and wait for it to become healthy. Use this for normal local development.
@@ -29,13 +36,14 @@ Read `soul.md` first before making changes. It is the repo's primary collaborati
 
 ## Key conventions
 
+- Keep the theme as a single source of truth in `app/styles/theme.css`.
+- Expose theme tokens to the app through Tailwind in `app/globals.css`.
+- Prefer Tailwind utility classes such as `bg-*`, `text-*`, and `border-*` throughout the app.
+- Do not introduce inline colour styles in components when a Tailwind theme token can be used instead.
 - Reuse shared UI from `app/components/` before adding new common components. `Button` and other primitives already encode the repo's styling approach.
-- Keep theme values in `app/styles/theme.css` and expose them through Tailwind tokens in `app/globals.css`. Prefer utility classes backed by those tokens instead of inline colors or route-local color constants.
-- When a route starts mixing rendering with page-specific loading, move the loading/query logic into a nearby module like `data.ts`. The admin route is the pattern to follow.
+- When a route file starts mixing rendering with page-specific queries or loaders, extract that data logic into a nearby module such as `data.ts` and keep the page focused on composition.
 - Server-side form handling on the admin side uses `useActionState` in client components plus server actions that return structured `AdminFormState` objects. Preserve that flow instead of introducing ad-hoc client fetches for the same forms.
 - Validate form input with Zod in the server action layer and convert DB constraint failures into user-facing messages. `app/admin/actions.ts` is the reference pattern.
 - Preserve the source URL rules in admin flows: `sourceUrls` are newline-separated, deduplicated, and must be HTTPS.
 - The app uses `sonner` toast notifications through the shared `ToastProvider`; admin forms surface success/error states through toasts and `router.refresh()`.
 - Store markdown planning artifacts in `plan/` when a reviewable repo-local plan file is needed.
-- When opening a PR for this repo without contrary instructions, default to a draft PR.
-- For conversational questions, answer in normal chat first; do not rely on task completion/status UI as the handoff.
