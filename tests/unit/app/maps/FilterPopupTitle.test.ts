@@ -22,4 +22,15 @@ describe("app/maps/FilterPopupTitle", () => {
     expect(html).toContain(">Filter<");
     expect(html).not.toContain(">Back<");
   });
+
+  it("omits the back button when back navigation is requested without a handler", () => {
+    const html = renderToStaticMarkup(
+      createElement(FilterPopupTitle, {
+        canGoBack: true,
+      }),
+    );
+
+    expect(html).toContain(">Filter<");
+    expect(html).not.toContain(">Back<");
+  });
 });

@@ -12,14 +12,16 @@ export default function FilterPopupTitle({
   canGoBack = false,
   onBack,
 }: FilterPopupTitleProps) {
+  const showBackButton = canGoBack && typeof onBack === "function";
+
   return (
     <div className="flex items-center gap-3">
-      {canGoBack ? (
+      {showBackButton ? (
         <Button
           onClick={onBack}
           size="sm"
           variant="ghost"
-          className="shrink-0 border border-border bg-background shadow-sm hover:border-slate-400"
+          className="shrink-0 border border-border bg-background shadow-sm hover:bg-muted"
         >
           <FiArrowLeft size={16} />
           Back
