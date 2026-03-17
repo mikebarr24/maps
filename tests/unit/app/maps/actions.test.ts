@@ -1,4 +1,6 @@
+import { z } from "zod";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { searchResultsSchema } from "../../../../app/maps/searchResultsSchema";
 
 const {
   selectMock,
@@ -158,5 +160,52 @@ describe("app/maps/actions", () => {
         },
       }),
     );
+  });
+
+  it("keeps originalUrl as a plain string in JSON schema while validating web URLs at runtime", () => {
+    const jsonSchema = z.toJSONSchema(searchResultsSchema);
+
+    expect(jsonSchema).toMatchObject({
+      properties: {
+        results: {
+          items: {
+            properties: {
+              originalUrl: {
+                type: "string",
+              },
+            },
+          },
+        },
+      },
+    });
+    expect(JSON.stringify(jsonSchema)).not.toContain('"format":"uri"');
+
+    expect(
+      searchResultsSchema.safeParse({
+        results: [
+          {
+            title: "Burbage South",
+            latitude: 53.34,
+            longitude: -1.62,
+            shortDescription: "Popular gritstone edges with varied climbing.",
+            originalUrl: "https://example.com/burbage-south",
+          },
+        ],
+      }).success,
+    ).toBe(true);
+
+    expect(
+      searchResultsSchema.safeParse({
+        results: [
+          {
+            title: "Burbage South",
+            latitude: 53.34,
+            longitude: -1.62,
+            shortDescription: "Popular gritstone edges with varied climbing.",
+            originalUrl: "not-a-url",
+          },
+        ],
+      }).success,
+    ).toBe(false);
   });
 });

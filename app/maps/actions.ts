@@ -7,6 +7,7 @@ import { generateStructuredOutput } from "@/app/ai/service";
 import { db } from "@/db";
 import { logger } from "@/db/logger";
 import { activities, activityTypes } from "@/db/schema";
+import { searchResultsSchema } from "./searchResultsSchema";
 import type { MapSearchFormState } from "./types";
 
 const searchRequestSchema = z.object({
@@ -16,18 +17,6 @@ const searchRequestSchema = z.object({
     .trim()
     .min(1, "Enter where you want to do this.")
     .max(160, "Where must be 160 characters or fewer."),
-});
-
-const searchResultsSchema = z.object({
-  results: z.array(
-    z.object({
-      title: z.string().trim().min(1).max(160),
-      latitude: z.number().min(-90).max(90),
-      longitude: z.number().min(-180).max(180),
-      shortDescription: z.string().trim().min(1).max(280),
-      originalUrl: z.string().trim().url(),
-    }),
-  ),
 });
 
 const mapSearchConfig: AiRequestConfig = {
