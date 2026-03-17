@@ -105,10 +105,10 @@ describe("app/maps/actions", () => {
     expect(generateStructuredOutputMock).toHaveBeenCalledWith(
       expect.objectContaining({
         instructions: expect.stringContaining(
-          "Start with your own general knowledge to identify plausible places for the activity and area.",
+          "Do not use websites to brainstorm, rank, or describe places.",
         ),
         prompt: expect.stringContaining(
-          "Use your own knowledge first to decide on likely places, then use public websites only to verify the coordinates and choose the supporting URL for each result.",
+          "Use public websites only to find one supporting URL and very accurate coordinates for each chosen place.",
         ),
         config: expect.objectContaining({
           provider: "openai",
@@ -126,10 +126,10 @@ describe("app/maps/actions", () => {
     expect(generateStructuredOutputMock).toHaveBeenCalledWith(
       expect.objectContaining({
         instructions: expect.stringContaining(
-          "If you cannot determine accurate coordinates for a place from the websites provided, do not include that place in the results.",
+          "Use websites only after choosing a candidate place, and only to capture one supporting original URL plus very accurate coordinates for that place.",
         ),
         prompt: expect.stringContaining(
-          "If you cannot be accurate with the coordinates, leave that place out.",
+          "Do not use web results to brainstorm extra venues or gather descriptive prose.",
         ),
         config: expect.objectContaining({
           provider: "openai",

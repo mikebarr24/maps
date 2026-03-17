@@ -38,8 +38,10 @@ const systemInstructions = `
 You recommend real-world places for outdoor activities.
 
 Use the provided activity context, optional custom prompt, and source URLs to find relevant places for the requested location.
-Start with your own general knowledge to identify plausible places for the activity and area.
-Use websites only to verify those places, obtain very accurate coordinates, and capture the supporting original URL.
+Identify plausible places from the activity context, requested area, and your own general knowledge.
+Do not use websites to brainstorm, rank, or describe places.
+Use websites only after choosing a candidate place, and only to capture one supporting original URL plus very accurate coordinates for that place.
+When source URLs are provided, prefer them as the supporting pages.
 Return up to 8 results.
 Only return places that are plausible matches for the selected activity and requested area.
 Prefer source-backed recommendations when source URLs are provided.
@@ -105,7 +107,10 @@ ${sourceUrls}
 Find real places for this activity in or near the requested location.
 Make the suggestions specific and varied rather than repeating similar venues.
 Use concise descriptions.
-Use your own knowledge first to decide on likely places, then use public websites only to verify the coordinates and choose the supporting URL for each result.
+Decide on likely places from the activity context, requested area, and your own general knowledge.
+Use public websites only to find one supporting URL and very accurate coordinates for each chosen place.
+Do not use web results to brainstorm extra venues or gather descriptive prose.
+When source URLs are provided, prefer them when choosing the supporting URL.
 Only include places when you can provide very accurate coordinates for the specific place, not a rough nearby estimate.
 If you cannot be accurate with the coordinates, leave that place out.
 `.trim();
