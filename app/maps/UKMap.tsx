@@ -154,7 +154,7 @@ function MapResultsLayer({
               <a
                 className="text-sm font-medium text-sky-700 underline"
                 href={result.originalUrl}
-                rel="noreferrer"
+                rel="noreferrer noopener"
                 target="_blank"
               >
                 Open source
