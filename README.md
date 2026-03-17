@@ -246,6 +246,7 @@ OpenAI is the only wired provider today. The current OpenAI model allowlist is:
 
 Thinking levels map to OpenAI reasoning effort:
 
+- `none`
 - `minimal`
 - `low`
 - `medium`

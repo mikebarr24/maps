@@ -9,6 +9,7 @@ export enum AiProvider {
 export const aiProviders = [AiProvider.OpenAI, AiProvider.Anthropic] as const;
 
 export enum AiThinkingLevel {
+  None = "none",
   Minimal = "minimal",
   Low = "low",
   Medium = "medium",

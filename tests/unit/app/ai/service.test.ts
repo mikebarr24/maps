@@ -93,6 +93,16 @@ describe("app/ai/service", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts the none thinking level in the request config schema", () => {
+    const result = aiRequestConfigSchema.safeParse({
+      provider: AiProvider.OpenAI,
+      model: "gpt-5.4-mini",
+      thinking: AiThinkingLevel.None,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("passes config tools through to structured generation", async () => {
     const schema = z.object({
       answer: z.string(),

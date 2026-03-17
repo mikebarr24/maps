@@ -47,14 +47,13 @@ function getOpenAIProviderRegistry() {
   return openAIProviderRegistry;
 }
 
-function isSupportedOpenAIModel(
-  model: string,
-): model is OpenAIModel {
+function isSupportedOpenAIModel(model: string): model is OpenAIModel {
   return supportedOpenAIModels.includes(model as OpenAIModel);
 }
 
 function mapThinkingToOpenAIReasoningEffort(thinking: AiThinkingLevel) {
   return {
+    [AiThinkingLevel.None]: "none",
     [AiThinkingLevel.Minimal]: "minimal",
     [AiThinkingLevel.Low]: "low",
     [AiThinkingLevel.Medium]: "medium",
