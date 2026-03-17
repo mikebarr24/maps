@@ -5,6 +5,8 @@ export enum AiProvider {
   Anthropic = "anthropic",
 }
 
+export const aiProviders = [AiProvider.OpenAI, AiProvider.Anthropic] as const;
+
 export const aiThinkingLevels = ["minimal", "low", "medium", "high"] as const;
 
 export type AiThinkingLevel = (typeof aiThinkingLevels)[number];
@@ -16,7 +18,7 @@ export type AiRequestConfig = {
 };
 
 export const aiRequestConfigSchema: z.ZodType<AiRequestConfig> = z.object({
-  provider: z.enum(AiProvider),
+  provider: z.enum(aiProviders),
   model: z.string().trim().min(1, "Model is required."),
   thinking: z.enum(aiThinkingLevels),
 });

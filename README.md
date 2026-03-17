@@ -27,7 +27,7 @@ On the admin route you can create, update, and delete both record types. Source 
 
 ### Prerequisites
 
-- Node.js
+- Node.js 20+
 - Docker Desktop or another local Docker runtime
 
 ### Environment
@@ -220,7 +220,7 @@ The repo includes a provider-agnostic AI service under `app/ai/`. The service ac
 - `thinking`
 - optional `sessionId`
 
-It currently exposes helpers for plain-text and structured output generation on the server.
+It currently exposes helpers for plain-text and structured output generation on the server. This branch does not yet wire those helpers into an admin or route-level product flow.
 
 OpenAI is the only wired provider today. The current OpenAI model allowlist is:
 

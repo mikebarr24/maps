@@ -2,6 +2,9 @@
   "name": "maps",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "predev": "node scripts/ensure-dev-db.mjs",
     "dev": "next dev",

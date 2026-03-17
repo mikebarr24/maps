@@ -45,6 +45,13 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown AI service error.";
 }
 
+function buildAiGenerationError(config: AiRequestConfig, error: unknown) {
+  return new Error(
+    `AI generation failed for ${config.provider}/${config.model}: ${getErrorMessage(error)}`,
+    { cause: error },
+  );
+}
+
 export async function generateStructuredOutput<TSchema extends z.ZodTypeAny>({
   instructions,
   prompt,
@@ -71,9 +78,7 @@ export async function generateStructuredOutput<TSchema extends z.ZodTypeAny>({
 
     return schema.parse(result.output);
   } catch (error) {
-    throw new Error(
-      `AI generation failed for ${config.provider}/${config.model}: ${getErrorMessage(error)}`,
-    );
+    throw buildAiGenerationError(config, error);
   }
 }
 
@@ -101,8 +106,6 @@ export async function generatePlainText({
 
     return result.output;
   } catch (error) {
-    throw new Error(
-      `AI generation failed for ${config.provider}/${config.model}: ${getErrorMessage(error)}`,
-    );
+    throw buildAiGenerationError(config, error);
   }
 }
