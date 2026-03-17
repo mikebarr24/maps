@@ -4,6 +4,8 @@ When the user asks you to create a pull request and does not explicitly say othe
 
 Always send a normal user-visible response in chat. Never rely on task completion UI alone to communicate that work is done.
 
+Do not run Playwright end-to-end tests as part of routine local validation. The pull request pipeline should provide that coverage unless the user explicitly asks for a Playwright run.
+
 Theme and colour rules:
 - Keep the theme as a single source of truth in `app/styles/theme.css`.
 - Expose theme tokens to the app through Tailwind in `app/globals.css`.
