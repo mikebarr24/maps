@@ -2,6 +2,8 @@
 
 Read `soul.md` first before making changes. It is the repo's primary collaboration guide, and this file captures the repository-specific engineering workflow that should travel with the codebase.
 
+When working on logging, also read `.github/instructions/logging-instruction.md`.
+
 ## Working agreements
 
 - When the user asks you to create a pull request and does not explicitly say otherwise, create it as a draft pull request by default.
