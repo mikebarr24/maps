@@ -1,70 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Maps
 
-## Getting Started
+`maps` is a Next.js App Router project for managing map activity filters and exploring them on an interactive UK map. The repo currently combines three main pieces:
 
-### Option 1: Run Locally On Your Host
+- a simple home route used for shared UI experiments
+- a client-side `/maps` experience built with Leaflet and an optional RainViewer rain overlay
+- a server-rendered `/admin` portal for managing activity types and activities stored in Postgres via Drizzle
 
-First, run the development server:
+## Routes
+
+- `/` - a lightweight demo page that currently exercises shared UI components such as the reusable popup
+- `/maps` - a UK-focused interactive map using OpenTopoMap tiles, Leaflet, and a toggleable RainViewer radar overlay
+- `/admin` - a data-management portal for activity types and activities
+
+The admin route currently has no access control, so treat it as a local-development tool until authentication is added.
+
+## What the admin portal manages
+
+The Postgres schema is centered on two tables:
+
+- `activity_types` - top-level groups with a unique name and optional newline-entered HTTPS source URLs
+- `activities` - items that belong to an activity type and store a title, description, optional custom prompt, and a published flag
+
+On the admin route you can create, update, and delete both record types. Source URLs are deduplicated and must use `https`.
+
+## Local setup
+
+### Prerequisites
+
+- Node.js
+- Docker Desktop or another local Docker runtime
+
+### Environment
+
+Copy the example file and adjust values if needed:
 
 ```bash
+cp .env.example .env.local
+```
+
+Required:
+
+```bash
+DATABASE_URL=postgres://postgres:postgres@localhost:5433/maps
+```
+
+Optional, only needed when using the OpenAI-backed AI service:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key
+```
+
+### Start the app
+
+Install dependencies, then start the dev server:
+
+```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-When you run `npm run dev`, the local `maps-postgres` Docker container is started automatically and the command waits for Postgres to become healthy before Next.js boots.
+`npm run dev` runs `scripts/ensure-dev-db.mjs` first, which starts the local `maps-postgres` Docker container and waits for it to become healthy before Next.js boots.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) when the server is ready.
 
-### Option 2: Run With Docker Compose
+## Local Postgres and Drizzle
 
-This repo includes `docker-compose.yml` for local Postgres development if you want to manage the database yourself.
-
-Start the stack:
-
-```bash
-docker compose up
-```
-
-Run it in the background:
+If you want to manage the database container yourself instead of relying on `npm run dev`, use Docker Compose directly:
 
 ```bash
 docker compose up -d
 ```
 
-Stop it:
+Stop it with:
 
 ```bash
 docker compose down
 ```
 
-The Postgres container is exposed on `localhost:5433` for tools running on your host.
+The Postgres container is exposed on `localhost:5433`, so host-based local development uses:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+postgres://postgres:postgres@localhost:5433/maps
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Drizzle commands:
 
-## Browser Automation (Playwright)
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:push
+npm run db:studio
+```
 
-Playwright is configured for end-to-end browser automation.
+Use `npm run db:migrate` after pulling schema changes or whenever `/admin` reports that the schema is not in the database yet.
 
-Install browser binaries (one-time setup on a new machine):
+## Validation and test commands
+
+Lint the codebase:
+
+```bash
+npm run lint
+```
+
+Run a production build:
+
+```bash
+npm run build
+```
+
+`DATABASE_URL` must be set for builds because the database environment is validated at import time.
+
+Start the production server after building:
+
+```bash
+npm run start
+```
+
+## Browser automation with Playwright
+
+Install Chromium once on a new machine:
 
 ```bash
 npx playwright install chromium
 ```
 
-Run the e2e test suite:
+Run the end-to-end suite:
 
 ```bash
 npm run test:e2e
 ```
 
-Run tests with a visible browser:
+Run tests headed:
 
 ```bash
 npm run test:e2e:headed
@@ -76,26 +142,39 @@ Open Playwright UI mode:
 npm run test:e2e:ui
 ```
 
-Generate automation steps by clicking in a browser:
+Run a single spec:
+
+```bash
+npx playwright test tests/e2e/homepage.spec.ts
+```
+
+Run a single test case:
+
+```bash
+npx playwright test tests/e2e/admin-activity-types.spec.ts -g "rejects non-https source URLs on the admin activity type form"
+```
+
+Generate Playwright steps by clicking in a browser:
 
 ```bash
 npm run dev
-# in another terminal:
+# in another terminal
 npm run playwright:codegen
 ```
 
-## Copilot Browser Control (MCP)
+Playwright is configured with a `webServer`, so the test runner starts `npm run dev -- --hostname 127.0.0.1 --port 3000` automatically and reuses an existing local server when possible.
 
-This repo now includes a local MCP server that keeps a persistent Playwright
-browser session open so GitHub Copilot CLI can drive the app running in dev.
+## Copilot browser control (MCP)
 
-1. Start the Next.js dev server. This also ensures the local Docker Postgres container is running first:
+This repo includes a local Playwright-backed MCP server so GitHub Copilot CLI can drive a running app session in the browser.
+
+1. Start the app:
 
    ```bash
    npm run dev -- --hostname 127.0.0.1 --port 3000
    ```
 
-2. In Copilot CLI, add the local MCP server with `/mcp add`:
+2. In Copilot CLI, add the MCP server with `/mcp add`:
 
    - **Server Name:** `maps-browser`
    - **Server Type:** `STDIO`
@@ -104,12 +183,14 @@ browser session open so GitHub Copilot CLI can drive the app running in dev.
    - **Environment Variables:** `{}`
    - **Tools:** `*`
 
-3. Once connected, ask Copilot to use the browser tools. The MCP server exposes:
+3. Ask Copilot to use the browser tools.
 
-   - `browser_navigate` - open an absolute URL or a path like `/maps`
-   - `browser_click` - click the first match for a Playwright selector
-   - `browser_type` - fill a field and optionally press Enter
-   - `browser_screenshot` - save a screenshot and return the image inline
+Exposed tools include:
+
+- `browser_navigate`
+- `browser_click`
+- `browser_type`
+- `browser_screenshot`
 
 Example prompts:
 
@@ -118,7 +199,7 @@ Use maps-browser to navigate to /maps and take a screenshot.
 Use maps-browser to click text=Hello World on the homepage.
 ```
 
-Optional environment variables for the MCP server:
+Optional MCP server environment variables:
 
 ```bash
 BROWSER_CONTROL_BASE_URL=http://127.0.0.1:3000
@@ -128,49 +209,29 @@ BROWSER_CONTROL_TIMEOUT_MS=15000
 BROWSER_CONTROL_OUTPUT_DIR=.browser-control
 ```
 
-Screenshots are saved under `.browser-control/`, which is gitignored.
+Screenshots are written to `.browser-control/`, which is gitignored.
 
-## Postgres With Drizzle
+## Server-side AI service
 
-This repo is set up for Postgres via Drizzle ORM.
+The repo includes a provider-agnostic AI service under `app/ai/`. The service accepts:
 
-1. Put your Postgres connection string in `DATABASE_URL`.
-   For host-based local development, `.env.local` is the simplest place.
-2. Define tables in `db/schema.ts`.
-3. Create migrations with `npm run db:generate`, then apply them with `npm run db:migrate`.
-4. For local prototyping against your Docker database, `npm run db:push` is the fastest way to sync schema changes.
-5. Open Drizzle Studio with `npm run db:studio`.
+- `provider`
+- `model`
+- `thinking`
+- optional `sessionId`
 
-The reusable database client lives in `db/index.ts`.
+It currently exposes helpers for plain-text and structured output generation on the server.
 
-Connection strings:
+OpenAI is the only wired provider today. The current OpenAI model allowlist is:
 
-- Host machine talking to Docker Postgres: `postgres://postgres:postgres@localhost:5433/maps`
+- `gpt-5-mini`
+- `gpt-5`
 
-## AI-powered admin descriptions
+Thinking levels map to OpenAI reasoning effort:
 
-The admin activity form can generate draft descriptions on the server using the
-Vercel AI SDK. To enable that flow locally, add your OpenAI key to `.env.local`:
+- `minimal`
+- `low`
+- `medium`
+- `high`
 
-```bash
-OPENAI_API_KEY=your_openai_api_key
-```
-
-The server-side AI integration is centralized under `app/ai/`, so app features
-can choose a provider, model, and thinking level per request without importing
-provider SDK details directly.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`OPENAI_API_KEY` is only required when the OpenAI provider is actually used.
