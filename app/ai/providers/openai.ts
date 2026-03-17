@@ -16,10 +16,6 @@ const openAIEnvSchema = z.object({
   ),
 });
 
-let openAIProviderRegistry:
-  | ReturnType<typeof createProviderRegistry>
-  | undefined;
-
 function getOpenAIEnv() {
   const parsed = openAIEnvSchema.safeParse({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
@@ -34,6 +30,10 @@ function getOpenAIEnv() {
 
   return parsed.data;
 }
+
+let openAIProviderRegistry:
+  | ReturnType<typeof createProviderRegistry>
+  | undefined;
 
 function getOpenAIProviderRegistry() {
   if (!openAIProviderRegistry) {
