@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { db, type Db } from "./index";
+import { db } from "./index";
 import {
   eventLogs,
   type EventLogLevel,
@@ -43,7 +43,13 @@ type NormalizedErrorDetails = {
   stack?: string;
 };
 
-type LogWriter = Pick<Db, "insert">;
+type EventLogInsertValues = typeof eventLogs.$inferInsert;
+
+type LogWriter = {
+  insert(table: typeof eventLogs): {
+    values(values: EventLogInsertValues): PromiseLike<unknown>;
+  };
+};
 
 const normalizeError = (error: unknown): NormalizedErrorDetails => {
   if (error instanceof Error) {
