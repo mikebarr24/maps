@@ -12,20 +12,29 @@ export type PopupProps = {
 
 export default function Popup({ children, onClose }: PopupProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const portalTarget = typeof document === "undefined" ? null : document.body;
 
   useEffect(() => {
-    panelRef.current?.focus();
-  }, []);
+    if (!portalTarget) {
+      return;
+    }
 
-  useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, []);
+  }, [portalTarget]);
 
   useEffect(() => {
+    panelRef.current?.focus();
+  }, [portalTarget]);
+
+  useEffect(() => {
+    if (!portalTarget) {
+      return;
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.stopPropagation();
@@ -36,7 +45,11 @@ export default function Popup({ children, onClose }: PopupProps) {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  }, [onClose, portalTarget]);
+
+  if (!portalTarget) {
+    return null;
+  }
 
   return createPortal(
     <div
@@ -66,6 +79,6 @@ export default function Popup({ children, onClose }: PopupProps) {
         {children}
       </div>
     </div>,
-    document.body,
+    portalTarget,
   );
 }
