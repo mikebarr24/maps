@@ -1,4 +1,5 @@
 import { tool } from "ai";
+import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -73,6 +74,19 @@ describe("app/ai/service", () => {
       thinking: AiThinkingLevel.Low,
       tools: {
         lookupPlace: placeLookupTool,
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts provider-defined tools in the request config schema", () => {
+    const result = aiRequestConfigSchema.safeParse({
+      provider: AiProvider.OpenAI,
+      model: "gpt-5-mini",
+      thinking: AiThinkingLevel.Low,
+      tools: {
+        webSearch: openai.tools.webSearch(),
       },
     });
 

@@ -36,6 +36,8 @@ const {
   };
 });
 
+vi.mock("server-only", () => ({}));
+
 vi.mock("@/app/ai/service", () => ({
   generateStructuredOutput: generateStructuredOutputMock,
 }));
@@ -108,6 +110,17 @@ describe("app/maps/actions", () => {
         prompt: expect.stringContaining(
           "If you cannot be accurate with the coordinates, leave that place out.",
         ),
+        config: expect.objectContaining({
+          provider: "openai",
+          model: "gpt-5.4-mini",
+          thinking: "low",
+          tools: expect.objectContaining({
+            webSearch: expect.objectContaining({
+              type: "provider",
+              id: "openai.web_search",
+            }),
+          }),
+        }),
       }),
     );
     expect(loggerErrorMock).toHaveBeenCalledWith({

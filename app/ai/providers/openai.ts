@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createProviderRegistry } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createOpenAI, openai as defaultOpenAIProvider } from "@ai-sdk/openai";
 import { z } from "zod";
 import { AiThinkingLevel } from "../contracts";
 import { OpenAIModel, supportedOpenAIModels } from "./openai-models";
@@ -82,4 +82,8 @@ export function buildOpenAIProviderOptions(
       user: sessionId,
     },
   };
+}
+
+export function createOpenAIWebSearchTool() {
+  return defaultOpenAIProvider.tools.webSearch();
 }

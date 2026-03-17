@@ -20,18 +20,34 @@ export const aiThinkingLevels = Object.values(AiThinkingLevel) as [
   ...AiThinkingLevel[],
 ];
 
+function isAiSdkTool(value: unknown): value is ToolSet[string] {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const tool = value as {
+    execute?: unknown;
+    id?: unknown;
+    inputSchema?: unknown;
+    type?: unknown;
+  };
+
+  if (!("inputSchema" in tool)) {
+    return false;
+  }
+
+  return (
+    typeof tool.execute === "function" ||
+    (tool.type === "provider" && typeof tool.id === "string")
+  );
+}
+
 function isToolSet(value: unknown): value is ToolSet {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
 
-  return Object.values(value).every(
-    (tool) =>
-      typeof tool === "object" &&
-      tool !== null &&
-      "execute" in tool &&
-      typeof tool.execute === "function",
-  );
+  return Object.values(value).every(isAiSdkTool);
 }
 
 export type AiRequestConfig = {

@@ -8,6 +8,7 @@ import {
   type AiRequestConfig,
 } from "@/app/ai/contracts";
 import { OpenAIModel } from "@/app/ai/providers/openai-models";
+import { createOpenAIWebSearchTool } from "@/app/ai/providers/openai";
 import { generateStructuredOutput } from "@/app/ai/service";
 import { db } from "@/db";
 import { logger } from "@/db/logger";
@@ -28,6 +29,9 @@ const mapSearchConfig: AiRequestConfig = {
   provider: AiProvider.OpenAI,
   model: OpenAIModel.Gpt54Mini,
   thinking: AiThinkingLevel.Low,
+  tools: {
+    webSearch: createOpenAIWebSearchTool(),
+  },
 };
 
 const systemInstructions = `
