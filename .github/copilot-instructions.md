@@ -4,6 +4,8 @@ Read `soul.md` first before making changes. It is the repo's primary collaborati
 
 If you are working on the AI layer or provider integrations, also read `.github/instructions/ai-integration-instructions.md`.
 
+When working on logging, also read `.github/instructions/logging-instruction.md`.
+
 ## Working agreements
 
 - When the user asks you to create a pull request and does not explicitly say otherwise, create it as a draft pull request by default.
