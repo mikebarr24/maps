@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import Button from "@/app/components/Button";
 import FormFieldError from "@/app/components/FormFieldError";
 import Popup from "@/app/components/Popup";
+import { joinClasses } from "@/app/lib/classNames";
+import { getActivityOptionClasses } from "./activityOptionStyles";
 import { searchActivitiesAction } from "./actions";
 import type {
   MapPlaceResult,
@@ -66,9 +68,6 @@ type RainViewerResponse = {
     }>;
   };
 };
-
-const joinClasses = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
 
 const getLatestRainTileUrl = (data: RainViewerResponse): string => {
   const latestFrame = data.radar?.past?.at(-1);
@@ -468,16 +467,13 @@ export default function UKMap({
                     <div className="space-y-2">
                       {selectedActivityType.activities.map((activity) => {
                         const isSelected = selectedActivityId === activity.id;
+                        const activityOptionClasses =
+                          getActivityOptionClasses(isSelected);
 
                         return (
                           <button
                             key={activity.id}
-                            className={joinClasses(
-                              "w-full rounded-2xl border px-4 py-3 text-left transition",
-                              isSelected
-                                ? "border-sky-700 bg-sky-50"
-                                : "border-border bg-background hover:border-slate-400",
-                            )}
+                            className={activityOptionClasses.button}
                             onClick={() => setSelectedActivityId(activity.id)}
                             type="button"
                           >
@@ -486,18 +482,11 @@ export default function UKMap({
                                 <h4 className="m-0 text-base font-semibold">
                                   {activity.title}
                                 </h4>
-                                <p className="m-0 mt-1 text-sm leading-6 text-muted-foreground">
+                                <p className={activityOptionClasses.description}>
                                   {activity.description}
                                 </p>
                               </div>
-                              <span
-                                className={joinClasses(
-                                  "mt-0.5 h-4 w-4 shrink-0 rounded-full border-2",
-                                  isSelected
-                                    ? "border-sky-700 bg-sky-700"
-                                    : "border-slate-300 bg-transparent",
-                                )}
-                              />
+                              <span className={activityOptionClasses.indicator} />
                             </div>
                           </button>
                         );
