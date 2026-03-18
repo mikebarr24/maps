@@ -15,19 +15,19 @@ export default function FilterPopupTitle({
   const showBackButton = canGoBack && typeof onBack === "function";
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="min-w-0 space-y-3">
       {showBackButton ? (
         <Button
           onClick={onBack}
           size="sm"
           variant="ghost"
-          className="shrink-0 border border-border bg-background shadow-sm hover:bg-muted"
+          className="w-fit shrink-0 rounded-full border border-border bg-surface-elevated text-foreground shadow-sm hover:bg-muted"
         >
-          <FiArrowLeft size={16} />
+          <FiArrowLeft aria-hidden="true" size={16} />
           Back
         </Button>
       ) : null}
-      <h2 className="text-lg font-semibold">Filter</h2>
+      <h2 className="m-0 text-lg font-semibold text-foreground">Filter</h2>
     </div>
   );
 }
