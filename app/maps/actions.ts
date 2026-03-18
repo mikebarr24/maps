@@ -13,19 +13,25 @@ import { generateStructuredOutput } from "@/app/ai/service";
 import { db } from "@/db";
 import { logger } from "@/db/logger";
 import { activities, activityTypes } from "@/db/schema";
+import {
+  distanceBoundsMessage,
+  distanceStepMessage,
+  isSupportedDistanceKm,
+  mapDistanceRange,
+} from "./distance";
 import { searchResultsSchema } from "./searchResultsSchema";
 import type { MapSearchFormState } from "./types";
 
 const searchRequestSchema = z.object({
   activityId: z.coerce.number().int().positive("Choose an activity."),
   distanceKm: z.preprocess(
-    (value) => (value == null ? 25 : value),
+    (value) => (value == null ? mapDistanceRange.defaultKm : value),
     z
       .coerce.number()
       .int()
-      .min(5, "Distance must be between 5km and 50km.")
-      .max(50, "Distance must be between 5km and 50km.")
-      .refine((value) => value % 5 === 0, "Distance must be in 5km steps."),
+      .min(mapDistanceRange.minKm, distanceBoundsMessage)
+      .max(mapDistanceRange.maxKm, distanceBoundsMessage)
+      .refine(isSupportedDistanceKm, distanceStepMessage),
   ),
   where: z
     .string()

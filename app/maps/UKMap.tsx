@@ -24,6 +24,7 @@ import Button from "@/app/components/Button";
 import FormFieldError from "@/app/components/FormFieldError";
 import Popup from "@/app/components/Popup";
 import { searchActivitiesAction } from "./actions";
+import { mapDistanceRange } from "./distance";
 import type {
   MapPlaceResult,
   MapSearchFormState,
@@ -57,10 +58,6 @@ const googlePinIcon = new Icon({
 
 const fieldClassName =
   "w-full rounded-2xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition focus:border-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-60";
-const distanceRangeMinKm = 5;
-const distanceRangeMaxKm = 50;
-const distanceRangeStepKm = 5;
-const defaultDistanceKm = 25;
 
 type RainViewerResponse = {
   host?: string;
@@ -188,7 +185,9 @@ export default function UKMap({
     null,
   );
   const [locationQuery, setLocationQuery] = useState("");
-  const [distanceKm, setDistanceKm] = useState(defaultDistanceKm);
+  const [distanceKm, setDistanceKm] = useState<number>(
+    mapDistanceRange.defaultKm,
+  );
   const [activeResults, setActiveResults] = useState<MapPlaceResult[]>([]);
   const [activeSearchState, setActiveSearchState] = useState<{
     activityTitle: string;
@@ -550,17 +549,17 @@ export default function UKMap({
                         </div>
                         <input
                           className="w-full accent-sky-700"
-                          max={distanceRangeMaxKm}
-                          min={distanceRangeMinKm}
+                          max={mapDistanceRange.maxKm}
+                          min={mapDistanceRange.minKm}
                           name="distanceKm"
                           onChange={handleDistanceChange}
-                          step={distanceRangeStepKm}
+                          step={mapDistanceRange.stepKm}
                           type="range"
                           value={distanceKm}
                         />
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{distanceRangeMinKm}km</span>
-                          <span>{distanceRangeMaxKm}km</span>
+                          <span>{mapDistanceRange.minKm}km</span>
+                          <span>{mapDistanceRange.maxKm}km</span>
                         </div>
                         <p className="m-0 text-sm text-muted-foreground">
                           Choose how far from your selected location we should

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { searchResultsSchema } from "../../../../app/maps/searchResultsSchema";
+import { distanceStepMessage } from "../../../../app/maps/distance";
 
 const {
   selectMock,
@@ -260,7 +261,7 @@ describe("app/maps/actions", () => {
       message: "Fix the highlighted fields and try again.",
       results: [],
       fieldErrors: {
-        distanceKm: "Distance must be in 5km steps.",
+        distanceKm: distanceStepMessage,
       },
     });
     expect(generateStructuredOutputMock).not.toHaveBeenCalled();
