@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import Button from "@/app/components/Button";
 import FormFieldError from "@/app/components/FormFieldError";
 import Popup from "@/app/components/Popup";
+import { joinClasses } from "@/app/lib/classNames";
 import { getActivityOptionClasses } from "./activityOptionStyles";
 import { searchActivitiesAction } from "./actions";
 import type {
@@ -67,9 +68,6 @@ type RainViewerResponse = {
     }>;
   };
 };
-
-const joinClasses = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
 
 const getLatestRainTileUrl = (data: RainViewerResponse): string => {
   const latestFrame = data.radar?.past?.at(-1);

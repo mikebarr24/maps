@@ -1,8 +1,6 @@
 import { type ReactNode } from "react";
 import { FiChevronDown } from "react-icons/fi";
-
-const joinClasses = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+import { joinClasses } from "@/app/lib/classNames";
 
 export const settingsFieldClassName =
   "w-full rounded-2xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition focus:border-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-60";
@@ -15,11 +13,7 @@ export const settingsTextareaClassName = joinClasses(
 export const settingsCheckboxClassName =
   "h-4 w-4 rounded border-border accent-accent disabled:cursor-not-allowed";
 
-export function AdminPortal({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function AdminPortal({ children }: { children: ReactNode }) {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
       {children}
@@ -37,7 +31,7 @@ export function AdminPortalHero({
   description: string;
 }) {
   return (
-    <section className="rounded-[2rem] border border-border bg-surface px-6 py-7 shadow-sm sm:px-8">
+    <section className="rounded-4xl border border-border bg-surface px-6 py-7 shadow-sm sm:px-8">
       <p className="m-0 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
         {eyebrow}
       </p>
@@ -61,7 +55,7 @@ export function AdminPortalNotice({
   return (
     <section
       className={joinClasses(
-        "rounded-[1.5rem] border px-5 py-4 text-sm shadow-sm",
+        "rounded-3xl border px-5 py-4 text-sm shadow-sm",
         tone === "danger"
           ? "border-danger/30 bg-danger/10 text-danger"
           : "border-border bg-surface text-foreground",
@@ -89,7 +83,7 @@ export function AdminPortalSection({
 }) {
   return (
     <details
-      className="group rounded-[2rem] border border-border bg-surface px-4 py-5 shadow-sm sm:px-8 sm:py-6"
+      className="group rounded-4xl border border-border bg-surface px-4 py-5 shadow-sm sm:px-8 sm:py-6"
       open={defaultOpen}
     >
       <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">

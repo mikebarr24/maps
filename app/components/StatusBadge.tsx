@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import { joinClasses } from "@/app/lib/classNames";
 
 type StatusBadgeTone = "default" | "accent";
 
@@ -11,9 +12,6 @@ const toneClassNames: Record<StatusBadgeTone, string> = {
   accent: "bg-accent text-accent-foreground",
   default: "bg-background text-muted-foreground",
 };
-
-const joinClasses = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
 
 export default function StatusBadge({
   children,

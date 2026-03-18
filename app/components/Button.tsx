@@ -1,4 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { joinClasses } from "@/app/lib/classNames";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "inverseGhost";
 type ButtonSize = "sm" | "md" | "lg" | "icon";
@@ -30,9 +31,6 @@ const sizeStyles: Record<ButtonSize, string> = {
   lg: "min-h-11 px-5 py-3",
   icon: "h-10 w-10 p-0",
 };
-
-const joinClasses = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (

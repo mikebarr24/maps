@@ -1,5 +1,4 @@
-const joinClasses = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+import { joinClasses } from "@/app/lib/classNames";
 
 export const getActivityOptionClasses = (isSelected: boolean) => ({
   button: joinClasses(
