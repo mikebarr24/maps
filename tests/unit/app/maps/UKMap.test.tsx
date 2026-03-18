@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapSearchFormState, MapViewProps } from "../../../../app/maps/types";
 
@@ -64,7 +65,7 @@ vi.mock("react", async (importOriginal) => {
 });
 
 vi.mock("react-leaflet", () => ({
-  MapContainer: ({ children }: { children: React.ReactNode }) => (
+  MapContainer: ({ children }: { children: ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
   Marker: () => <div data-testid="marker" />,
@@ -170,6 +171,7 @@ async function openMapOptions() {
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 beforeEach(() => {
