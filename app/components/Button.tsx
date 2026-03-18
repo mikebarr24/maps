@@ -19,7 +19,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   secondary:
     "border-slate-900 bg-slate-900 text-white hover:border-slate-700 hover:bg-slate-700",
   ghost:
-    "border-transparent bg-transparent text-slate-900 hover:bg-slate-100",
+    "border-transparent bg-transparent text-foreground hover:bg-muted",
   inverseGhost:
     "border-transparent bg-transparent text-white hover:bg-white/10",
 };
