@@ -18,12 +18,15 @@ import type { MapSearchFormState } from "./types";
 
 const searchRequestSchema = z.object({
   activityId: z.coerce.number().int().positive("Choose an activity."),
-  distanceKm: z
-    .coerce.number()
-    .int()
-    .min(5, "Distance must be between 5km and 50km.")
-    .max(50, "Distance must be between 5km and 50km.")
-    .refine((value) => value % 5 === 0, "Distance must be in 5km steps."),
+  distanceKm: z.preprocess(
+    (value) => (value == null ? 25 : value),
+    z
+      .coerce.number()
+      .int()
+      .min(5, "Distance must be between 5km and 50km.")
+      .max(50, "Distance must be between 5km and 50km.")
+      .refine((value) => value % 5 === 0, "Distance must be in 5km steps."),
+  ),
   where: z
     .string()
     .trim()
