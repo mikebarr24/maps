@@ -129,8 +129,8 @@ describe("app/maps/actions", () => {
         instructions: expect.stringContaining(
           "Use websites only after choosing a candidate place, and only to capture one supporting original URL plus very accurate coordinates for that place.",
         ),
-        prompt: expect.stringContaining(
-          "Keep the results realistically within about 25km of the requested location.",
+        prompt: expect.stringMatching(
+          /(?=.*Keep the results realistically within about 25km of the requested location\.)(?=.*Do not use web results to brainstorm extra venues or gather descriptive prose\.)/s,
         ),
         config: expect.objectContaining({
           provider: "openai",
