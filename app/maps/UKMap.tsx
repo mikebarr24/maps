@@ -25,6 +25,7 @@ import FormFieldError from "@/app/components/FormFieldError";
 import Popup from "@/app/components/Popup";
 import FilterPopupTitle from "./FilterPopupTitle";
 import { searchActivitiesAction } from "./actions";
+import { mapDistanceRange } from "./distance";
 import type {
   MapPlaceResult,
   MapSearchFormState,
@@ -185,6 +186,9 @@ export default function UKMap({
     null,
   );
   const [locationQuery, setLocationQuery] = useState("");
+  const [distanceKm, setDistanceKm] = useState<number>(
+    mapDistanceRange.defaultKm,
+  );
   const [activeResults, setActiveResults] = useState<MapPlaceResult[]>([]);
   const [activeSearchState, setActiveSearchState] = useState<{
     activityTitle: string;
@@ -331,6 +335,10 @@ export default function UKMap({
 
   const handleLocationQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     setLocationQuery(event.currentTarget.value);
+  };
+
+  const handleDistanceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDistanceKm(Number(event.currentTarget.value));
   };
 
   const hasActivities = activityTypes.length > 0;
@@ -523,6 +531,38 @@ export default function UKMap({
                           search nearby options.
                         </p>
                         <FormFieldError message={searchState.fieldErrors?.where} />
+                      </label>
+
+                      <label className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-medium">
+                            Search radius
+                          </span>
+                          <span className="rounded-full bg-sky-50 px-3 py-1 text-sm font-semibold text-sky-700">
+                            {distanceKm}km
+                          </span>
+                        </div>
+                        <input
+                          className="w-full accent-sky-700"
+                          max={mapDistanceRange.maxKm}
+                          min={mapDistanceRange.minKm}
+                          name="distanceKm"
+                          onChange={handleDistanceChange}
+                          step={mapDistanceRange.stepKm}
+                          type="range"
+                          value={distanceKm}
+                        />
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{mapDistanceRange.minKm}km</span>
+                          <span>{mapDistanceRange.maxKm}km</span>
+                        </div>
+                        <p className="m-0 text-sm text-muted-foreground">
+                          Choose how far from your selected location we should
+                          look for matching places.
+                        </p>
+                        <FormFieldError
+                          message={searchState.fieldErrors?.distanceKm}
+                        />
                       </label>
 
                       <FormFieldError
