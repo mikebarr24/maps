@@ -4,6 +4,18 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MapSearchFormState, MapViewProps } from "../../../../app/maps/types";
 
+type HoistedMocks = {
+  fetchMock: ReturnType<typeof vi.fn>;
+  fitBoundsMock: ReturnType<typeof vi.fn>;
+  latLngBoundsMock: ReturnType<typeof vi.fn>;
+  searchActionMock: ReturnType<typeof vi.fn>;
+  searchActivitiesActionMock: ReturnType<typeof vi.fn>;
+  searchStateRef: { current: MapSearchFormState };
+  setViewMock: ReturnType<typeof vi.fn>;
+  toastErrorMock: ReturnType<typeof vi.fn>;
+  toastSuccessMock: ReturnType<typeof vi.fn>;
+};
+
 const {
   fetchMock,
   fitBoundsMock,
@@ -14,7 +26,7 @@ const {
   setViewMock,
   toastErrorMock,
   toastSuccessMock,
-} = vi.hoisted(() => ({
+} = vi.hoisted((): HoistedMocks => ({
   fetchMock: vi.fn(),
   fitBoundsMock: vi.fn(),
   latLngBoundsMock: vi.fn((coordinates: unknown) => ({
