@@ -23,7 +23,7 @@ export function buildProviderOptions(
 ) {
   switch (config.provider) {
     case AiProvider.OpenAI:
-      return buildOpenAIProviderOptions(config.thinking, sessionId);
+      return buildOpenAIProviderOptions(config.model, config.thinking, sessionId);
     case AiProvider.Anthropic:
       throw new Error(`Provider "${config.provider}" is not configured yet.`);
     default:

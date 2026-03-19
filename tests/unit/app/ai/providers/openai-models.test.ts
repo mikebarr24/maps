@@ -5,13 +5,15 @@ import {
 } from "../../../../../app/ai/providers/openai-models";
 
 describe("app/ai/providers/openai-models", () => {
-  it("includes the supported GPT-5.4 variants in the OpenAI allowlist", () => {
+  it("includes the supported OpenAI allowlist entries", () => {
     expect(supportedOpenAIModels).toEqual(
       expect.arrayContaining([
         OpenAIModel.Gpt5Mini,
         OpenAIModel.Gpt5,
         OpenAIModel.Gpt54Mini,
         OpenAIModel.Gpt54Nano,
+        OpenAIModel.Gpt53Chat,
+        OpenAIModel.Gpt4o,
       ]),
     );
   });

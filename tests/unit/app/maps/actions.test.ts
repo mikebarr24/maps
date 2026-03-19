@@ -114,12 +114,20 @@ describe("app/maps/actions", () => {
         ),
         config: expect.objectContaining({
           provider: "openai",
-          model: "gpt-5.4-mini",
+          model: "gpt-4o",
           thinking: "low",
+          maxOutputTokens: 3000,
+          maxRetries: 1,
           tools: expect.objectContaining({
             webSearch: expect.objectContaining({
               type: "provider",
               id: "openai.web_search",
+              args: {
+                searchContextSize: "low",
+                filters: {
+                  allowedDomains: ["example.com"],
+                },
+              },
             }),
           }),
         }),
@@ -131,16 +139,24 @@ describe("app/maps/actions", () => {
           "Use websites only after choosing a candidate place, and only to capture one supporting original URL plus very accurate coordinates for that place.",
         ),
         prompt: expect.stringMatching(
-          /(?=.*Keep the results realistically within about 25km of the requested location\.)(?=.*Do not use web results to brainstorm extra venues or gather descriptive prose\.)/s,
+          /(?=.*Keep the results realistically within about 25km of the requested location\.)(?=.*Do not use web results to brainstorm extra venues or gather descriptive prose\.)(?=.*site:example\.com Peak District Climbing)/s,
         ),
         config: expect.objectContaining({
           provider: "openai",
-          model: "gpt-5.4-mini",
+          model: "gpt-4o",
           thinking: "low",
+          maxOutputTokens: 3000,
+          maxRetries: 1,
           tools: expect.objectContaining({
             webSearch: expect.objectContaining({
               type: "provider",
               id: "openai.web_search",
+              args: {
+                searchContextSize: "low",
+                filters: {
+                  allowedDomains: ["example.com"],
+                },
+              },
             }),
           }),
         }),
@@ -160,7 +176,7 @@ describe("app/maps/actions", () => {
         hasCustomPrompt: true,
         sourceUrlCount: 2,
         provider: "openai",
-        model: "gpt-5.4-mini",
+        model: "gpt-4o",
         thinking: "low",
       },
     });
@@ -204,7 +220,7 @@ describe("app/maps/actions", () => {
           hasCustomPrompt: true,
           sourceUrlCount: 2,
           provider: "openai",
-          model: "gpt-5.4-mini",
+          model: "gpt-4o",
           thinking: "low",
         },
       }),

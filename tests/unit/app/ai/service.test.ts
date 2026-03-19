@@ -72,6 +72,8 @@ describe("app/ai/service", () => {
       provider: AiProvider.OpenAI,
       model: "gpt-5-mini",
       thinking: AiThinkingLevel.Low,
+      maxOutputTokens: 1200,
+      maxRetries: 0,
       tools: {
         lookupPlace: placeLookupTool,
       },
@@ -85,6 +87,8 @@ describe("app/ai/service", () => {
       provider: AiProvider.OpenAI,
       model: "gpt-5-mini",
       thinking: AiThinkingLevel.Low,
+      maxOutputTokens: 1200,
+      maxRetries: 1,
       tools: {
         webSearch: openai.tools.webSearch(),
       },
@@ -98,6 +102,8 @@ describe("app/ai/service", () => {
       provider: AiProvider.OpenAI,
       model: "gpt-5.4-mini",
       thinking: AiThinkingLevel.None,
+      maxOutputTokens: 800,
+      maxRetries: 0,
     });
 
     expect(result.success).toBe(true);
@@ -126,6 +132,8 @@ describe("app/ai/service", () => {
         provider: AiProvider.OpenAI,
         model: "gpt-5-mini",
         thinking: AiThinkingLevel.Low,
+        maxOutputTokens: 1200,
+        maxRetries: 0,
         tools,
       },
     });
@@ -133,6 +141,8 @@ describe("app/ai/service", () => {
     expect(result).toEqual({ answer: "done" });
     expect(generateTextMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        maxOutputTokens: 1200,
+        maxRetries: 0,
         tools,
       }),
     );
@@ -155,6 +165,8 @@ describe("app/ai/service", () => {
         provider: AiProvider.OpenAI,
         model: "gpt-5-mini",
         thinking: AiThinkingLevel.Low,
+        maxOutputTokens: 600,
+        maxRetries: 1,
         tools,
       },
     });
@@ -162,6 +174,8 @@ describe("app/ai/service", () => {
     expect(result).toBe("done");
     expect(generateTextMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        maxOutputTokens: 600,
+        maxRetries: 1,
         tools,
       }),
     );

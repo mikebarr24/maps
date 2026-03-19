@@ -26,8 +26,8 @@ const searchRequestSchema = z.object({
   activityId: z.coerce.number().int().positive("Choose an activity."),
   distanceKm: z.preprocess(
     (value) => (value == null ? mapDistanceRange.defaultKm : value),
-    z
-      .coerce.number()
+    z.coerce
+      .number()
       .int()
       .min(mapDistanceRange.minKm, distanceBoundsMessage)
       .max(mapDistanceRange.maxKm, distanceBoundsMessage)
@@ -40,13 +40,12 @@ const searchRequestSchema = z.object({
     .max(160, "Where must be 160 characters or fewer."),
 });
 
-const mapSearchConfig: AiRequestConfig = {
+const mapSearchBaseConfig: Omit<AiRequestConfig, "tools"> = {
   provider: AiProvider.OpenAI,
-  model: OpenAIModel.Gpt54Mini,
+  model: OpenAIModel.Gpt4o,
   thinking: AiThinkingLevel.Low,
-  tools: {
-    webSearch: createOpenAIWebSearchTool(),
-  },
+  maxOutputTokens: 3000,
+  maxRetries: 1,
 };
 
 const systemInstructions = `
@@ -94,12 +93,22 @@ function buildPrompt(input: {
   sourceUrls: string[];
   where: string;
 }) {
+  const allowedDomains = getAllowedDomains(input.sourceUrls);
   const sourceUrls =
     input.sourceUrls.length > 0
       ? input.sourceUrls
           .map((sourceUrl, index) => `${index + 1}. ${sourceUrl}`)
           .join("\n")
       : "No source URLs were provided for this activity type. Use reliable public sources and include the most relevant URL for each result.";
+  const domainSearchHint =
+    allowedDomains.length > 0
+      ? `\nWhen searching the web, prefer trusted-domain queries such as:\n${allowedDomains
+          .map(
+            (domain) =>
+              `- site:${domain} ${input.where} ${input.activityTypeName}`,
+          )
+          .join("\n")}`
+      : "";
 
   return `
 Requested location:
@@ -131,9 +140,38 @@ Decide on likely places from the activity context, requested area, and your own 
 Use public websites only to find one supporting URL and very accurate coordinates for each chosen place.
 Do not use web results to brainstorm extra venues or gather descriptive prose.
 When source URLs are provided, prefer them when choosing the supporting URL.
+${domainSearchHint}
 Only include places when you can provide very accurate coordinates for the specific place, not a rough nearby estimate.
 If you cannot be accurate with the coordinates, leave that place out.
-`.trim();
+  `.trim();
+}
+
+function getAllowedDomains(sourceUrls: string[]) {
+  const allowedDomains = new Set<string>();
+
+  for (const sourceUrl of sourceUrls) {
+    try {
+      allowedDomains.add(new URL(sourceUrl).hostname);
+    } catch {
+      continue;
+    }
+  }
+
+  return [...allowedDomains];
+}
+
+function buildMapSearchConfig(sourceUrls: string[]): AiRequestConfig {
+  const allowedDomains = getAllowedDomains(sourceUrls);
+
+  return {
+    ...mapSearchBaseConfig,
+    tools: {
+      webSearch: createOpenAIWebSearchTool({
+        searchContextSize: "low",
+        filters: allowedDomains.length > 0 ? { allowedDomains } : undefined,
+      }),
+    },
+  };
 }
 
 const logMapSearchError = async ({
@@ -248,6 +286,8 @@ export async function searchActivitiesAction(
       locationQuery: parsed.data.where,
     };
   }
+
+  const mapSearchConfig = buildMapSearchConfig(selectedActivity.sourceUrls);
 
   try {
     const output = await generateStructuredOutput({

@@ -38,13 +38,14 @@ Use this document alongside `.github/copilot-instructions.md` when working on th
 
 ## Supported OpenAI behavior
 
-- Supported OpenAI models are currently `gpt-5-mini`, `gpt-5`, `gpt-5.4-mini`, and `gpt-5.4-nano`.
-- Map repo thinking levels directly to OpenAI `reasoningEffort`:
+- Supported OpenAI models are currently `gpt-5-mini`, `gpt-5`, `gpt-5.4-mini`, `gpt-5.4-nano`, `gpt-5.3-chat-latest`, and `gpt-4o`.
+- For reasoning-capable OpenAI models, map repo thinking levels directly to OpenAI `reasoningEffort`:
   - `none` -> `none`
   - `minimal` -> `minimal`
   - `low` -> `low`
   - `medium` -> `medium`
   - `high` -> `high`
+- Omit `reasoningEffort` for non-reasoning models such as `gpt-4o`.
 - Pass `sessionId` through to provider options as the OpenAI `user` value when present.
 - The current provider-backed tool example is OpenAI web search, created with `createOpenAIWebSearchTool()` and attached to `AiRequestConfig.tools` under a caller-chosen key such as `webSearch`.
 

@@ -61,6 +61,17 @@ function mapThinkingToOpenAIReasoningEffort(thinking: AiThinkingLevel) {
   }[thinking];
 }
 
+const reasoningEffortSupportedOpenAIModels = new Set<OpenAIModel>([
+  OpenAIModel.Gpt5Mini,
+  OpenAIModel.Gpt5,
+  OpenAIModel.Gpt54Mini,
+  OpenAIModel.Gpt54Nano,
+]);
+
+function supportsOpenAIReasoningEffort(model: OpenAIModel) {
+  return reasoningEffortSupportedOpenAIModels.has(model);
+}
+
 export function resolveOpenAILanguageModel(model: string) {
   if (!isSupportedOpenAIModel(model)) {
     throw new Error(
@@ -72,17 +83,30 @@ export function resolveOpenAILanguageModel(model: string) {
 }
 
 export function buildOpenAIProviderOptions(
+  model: string,
   thinking: AiThinkingLevel,
   sessionId?: string,
 ) {
+  if (!isSupportedOpenAIModel(model)) {
+    throw new Error(
+      `Unsupported model "${model}" for provider "openai". Supported models: ${supportedOpenAIModels.join(", ")}.`,
+    );
+  }
+
   return {
     openai: {
-      reasoningEffort: mapThinkingToOpenAIReasoningEffort(thinking),
       user: sessionId,
+      ...(supportsOpenAIReasoningEffort(model)
+        ? {
+            reasoningEffort: mapThinkingToOpenAIReasoningEffort(thinking),
+          }
+        : {}),
     },
   };
 }
 
-export function createOpenAIWebSearchTool() {
-  return defaultOpenAIProvider.tools.webSearch();
+export function createOpenAIWebSearchTool(
+  args?: Parameters<typeof defaultOpenAIProvider.tools.webSearch>[0],
+) {
+  return defaultOpenAIProvider.tools.webSearch(args);
 }

@@ -243,13 +243,17 @@ OpenAI is the only wired provider today. The current OpenAI model allowlist is:
 - `gpt-5`
 - `gpt-5.4-mini`
 - `gpt-5.4-nano`
+- `gpt-5.3-chat-latest`
+- `gpt-4o`
 
-Thinking levels map to OpenAI reasoning effort:
+For reasoning-capable OpenAI models, thinking levels map to OpenAI reasoning effort:
 
 - `none`
 - `minimal`
 - `low`
 - `medium`
 - `high`
+
+Non-reasoning models such as `gpt-4o` should omit `reasoningEffort`.
 
 `OPENAI_API_KEY` is only required when the OpenAI provider is actually used.
